@@ -24,6 +24,7 @@ Here's a simple example:
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```ocaml
 # let x = 3;
 let x: int = 3;
@@ -32,9 +33,11 @@ let y: int = 4
 # let z = x + y;
 let z: int = 7
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let x = 3;;
 val x : int = 3
@@ -43,6 +46,7 @@ val y : int = 4
 # let z = x + y;;
 val z : int = 7
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -54,18 +58,22 @@ Reason turned `in` into `;` for visual familiarity, so you will use good old _bl
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```ocaml
 let <variable> = {
   <expr1>;
   <expr2>
 }
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 let <variable> = <expr1> in <expr2>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -74,14 +82,15 @@ This first evaluates `expr1` and then evaluates `expr2` with `variable` bound to
 {% hint style="info" %}
 Reason community embrace a different set of standard libraries provided by BuckleScript,
 
-* `Js` which binds directly to JavaScript APIs
-* `Belt`, a effort to provide a standard libraries crossing native and web platform.
+- `Js` which binds directly to JavaScript APIs
+- `Belt`, a effort to provide a standard libraries crossing native and web platform.
 
 We will use the most closed APIs we can find to demonstrate the same idea.
 {% endhint %}
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```ocaml
 let languages = "OCaml,Perl,C++,C";
 
@@ -90,9 +99,11 @@ let dashed_languages = {
   Js.Array.joinWith("-", language_list);
 };
 ```
+
 {% endtab %}
 
 {% tab title="OCaml \(de-reason\)" %}
+
 ```ocaml
 let languages = "OCaml,Perl,C++,C"
 
@@ -100,9 +111,11 @@ let dashed_languages =
   let language_list = Js.String.split "," languages in
   Js.Array.joinWith "-" language_list
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
@@ -112,6 +125,7 @@ val languages : string = "OCaml,Perl,C++,C"
   ;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -123,17 +137,21 @@ expression`Js.Array.joinWith("-", language_list);` in Reason sample.
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```swift
 Js.log(language_list);
 /* The value language_list can't be found */
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # language_list;;Characters -1-13:
 Error: Unbound value language_list
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -141,6 +159,7 @@ A `let` binding in an inner scope can _shadow_, or hide, the definition from an 
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```swift
 let languages = "OCaml,Perl,C++,C";
 
@@ -149,9 +168,11 @@ let dashed_languages = {
   Js.Array.joinWith("-", languages);
 };
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
@@ -161,6 +182,7 @@ val languages : string = "OCaml,Perl,C++,C"
   ;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -168,16 +190,20 @@ This time, in the inner scope we called the list of strings `languages` instead 
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```swift
 Js.log(languages);  /* "OCaml,Perl,C++,C" */
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # languages;;
 - : string = "OCaml,Perl,C++,C"
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -189,6 +215,7 @@ In Reason, we will simply use a anonymous block scope, which looks like a functi
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```swift
 # let area_of_ring = (inner_radius, outer_radius) => {
     let pi = acos(-1.);
@@ -199,9 +226,11 @@ let area_of_ring: (float, float) => float = <fun>;
 # area_of_ring(1., 3.);
 - : float = 25.1327412287183449
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let area_of_ring inner_radius outer_radius =
      let pi = acos (-1.) in
@@ -212,6 +241,7 @@ val area_of_ring : float -> float -> float = <fun>
 # area_of_ring 1. 3.;;
 - : float = 25.1327412287
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -219,6 +249,7 @@ It's important not to confuse a sequence of `let` bindings with the modification
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```swift
 # let area_of_ring = (inner_radius, outer_radius) => {
      let pi = acos(-1.);
@@ -231,9 +262,11 @@ Characters 125-127:
 Warning 26: unused variable pi.
 let area_of_ring: (float, float) => float = <fun>;
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let area_of_ring inner_radius outer_radius =
      let pi = acos (-1.) in
@@ -246,6 +279,7 @@ Characters 126-128:
 Warning 26: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -270,6 +304,7 @@ Thankfully, if you are using ES6 `let` rather than `var`, a `syntaxError` would 
 In OCaml, `let` bindings are immutable. There are many kinds of mutable values in OCaml, which we'll discuss in [Chapter 8, _Imperative Programming_](file:////Users/jsx/Google%20Drive/NOTES.d/reason/RealWorldReason/imperative-programming-1.html), but there are no mutable variables.
 
 {% hint style="success" %}
+
 ### Why Don't Variables Vary?
 
 One source of confusion for people new to OCaml is the fact that variables are immutable. This seems pretty surprising even on linguistic terms. Isn't the whole point of a variable that it can vary?
@@ -289,6 +324,7 @@ BuckleScript compiles Reason to JavaScript. Under the hood, it represents Reason
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```swift
 open Belt;
 let (ints, strings) = List.unzip([(1, "one"), (2, "two"), (3, "three")]);
@@ -301,14 +337,17 @@ let strings: list(string) = ["one", "two", "three"];
 Js.log(ints);     /* [1,[2,[3,0]]] */
 Js.log(strings);  /* ["one",["two",["three",0]]] */
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 val ints : int list = [1; 2; 3]
 val strings : string list = ["one"; "two"; "three"]
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -322,6 +361,7 @@ Using a pattern in a `let` binding makes the most sense for a pattern that is _i
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 let upcase_first_entry = line => {
   let [first, ...rest] = Array.to_list(Js.String.split(",", line));
@@ -335,9 +375,11 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let upcase_first_entry line =
      let (first :: rest) = String.split ~on:',' line in
@@ -350,6 +392,7 @@ Here is an example of a value that is not matched:
 []
 val upcase_first_entry : string -> string = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -357,6 +400,7 @@ This case can't really come up in practice, because `String.split` always return
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 let upcase_first_entry = line =>
   switch (Array.to_list(Js.String.split(",", line))) {
@@ -368,9 +412,11 @@ let upcase_first_entry = line =>
     )
   };
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let upcase_first_entry line =
      match String.split ~on:',' line with
@@ -378,6 +424,7 @@ let upcase_first_entry = line =>
      | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
   ;;val upcase_first_entry : string -> string = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -393,17 +440,21 @@ We'll start by looking at the most basic style of function declaration in OCaml:
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # (x) => x + 1;
 - : int => int = <fun>
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # (fun x -> x + 1);;
 - : int -> int = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -411,17 +462,21 @@ Anonymous functions operate in much the same way as named functions. For example
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # ((x) => x + 1)(7);
 - : int = 8
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # (fun x -> x + 1) 7;;
 - : int = 8
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -429,17 +484,21 @@ Or pass it to another function. Passing functions to iteration functions like `L
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # List.map(x => x + 1, [1, 2, 3]);
 - : list(int) = [2, 3, 4]
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # List.map ~f:(fun x -> x + 1) [1;2;3];;
 - : int list = [2; 3; 4]
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -447,21 +506,25 @@ You can even stuff them into a data structure:
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let increments = [x => x + 1, x => x + 2];
 let increments: list(int => int) = [<fun>, <fun>];
 # List.map(g => g(5), increments);
 - : list(int) = [6, 7]
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
 val increments : (int -> int) list = [<fun>; <fun>]
 # List.map ~f:(fun g -> g 5) increments;;
 - : int list = [6; 7]
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -471,21 +534,25 @@ The key thing to understand is that functions are ordinary values in OCaml, and 
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let plusone = x => x + 1;
 let plusone: int => int = <fun>;
 # plusone(3);
 - : int = 4
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let plusone = (fun x -> x + 1);;
 val plusone : int -> int = <fun>
 # plusone 3;;
 - : int = 4
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -497,23 +564,28 @@ Reason has no syntax sugar for it.
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let plusone = (x) => x + 1;
 let plusone: int => int = <fun>;
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let plusone x = x + 1;;
 val plusone : int -> int = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
 This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.
 
 {% hint style="success" %}
+
 ### let and fun
 
 Functions and `let` bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent:
@@ -521,21 +593,25 @@ Functions and `let` bindings have a lot to do with each other. In some sense, yo
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # (x => x + 1)(7);
 - : int = 8
 # {let x = 7; x + 1};
 - : int = 8
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # (fun x -> x + 1) 7;;
 - : int = 8
 # let x = 7 in x + 1;;
 - : int = 8
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -549,21 +625,25 @@ OCaml of course also supports multiargument functions, such as:
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let abs_diff = (x, y) => abs(x - y);
 let abs_diff: (int, int) => int = <fun>;
 # abs_diff(3, 4);
 - : int = 1
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let abs_diff x y = abs (x - y);;
 val abs_diff : int -> int -> int = <fun>
 # abs_diff 3 4;;
 - : int = 1
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -575,18 +655,22 @@ Reason embrace C-style syntax, but it's still curried under the hood.
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let abs_diff = (x) => ((y) => abs(x - y));
 let abs_diff: (int, int) => int = <fun>;
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let abs_diff =
     (fun x -> (fun y -> abs (x - y)));;
 val abs_diff : int -> int -> int = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -596,15 +680,19 @@ This style of function is called a _curried_ function. \(Currying is named after
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 let abs_diff : int => (int => int)
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 val abs_diff : int -> (int -> int)
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -618,6 +706,7 @@ Currying is more than just a theoretical curiosity. You can make use of currying
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let dist_from_3 = abs_diff(3);
 let dist_from_3: int => int = <fun>;
@@ -626,9 +715,11 @@ let dist_from_3: int => int = <fun>;
 # dist_from_3(-1);
 - : int = 4
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let dist_from_3 = abs_diff 3;;
 val dist_from_3 : int -> int = <fun>
@@ -637,6 +728,7 @@ val dist_from_3 : int -> int = <fun>
 # dist_from_3 (-1);;
 - : int = 4
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -646,17 +738,21 @@ Note that the `fun` keyword supports its own syntax for currying, so the followi
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let abs_diff = (x, y) => abs(x - y);
 let abs_diff: (int, int) => int = <fun>;
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let abs_diff = (fun x y -> abs (x - y));;
 val abs_diff : int -> int -> int = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -666,19 +762,23 @@ Currying is not the only way of writing a multiargument function in OCaml. It's 
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 let abs_diff = ((x, y)) => abs(x - y);
 let abs_diff: ((int, int)) => int = <fun>;
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let abs_diff (x,y) = abs (x - y);;
 val abs_diff : int * int -> int = <fun>
 # abs_diff (3,4);;
 - : int = 1
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -694,6 +794,7 @@ In order to define a recursive function, you need to mark the `let` binding as r
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let rec find_first_stutter = (list) =>
     switch list {
@@ -707,9 +808,11 @@ In order to define a recursive function, you need to mark the `let` binding as r
     };
 let find_first_stutter: list('a) => option('a) = <fun>;
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let rec find_first_stutter list =
     match list with
@@ -721,6 +824,7 @@ let find_first_stutter: list('a) => option('a) = <fun>;
    ;;
 val find_first_stutter : 'a list -> 'a option = <fun>
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -730,6 +834,7 @@ We can also define multiple mutually recursive values by using `let rec` combine
 
 {% tabs %}
 {% tab title="Reason" %}
+
 ```rust
 # let rec is_even = (x) =>
     if (x == 0) {
@@ -750,9 +855,11 @@ let is_odd: int => bool = <fun>;
 # List.map(is_odd, [0, 1, 2, 3, 4, 5]);
 - : list(bool) = [false, true, false, true, false, true]
 ```
+
 {% endtab %}
 
 {% tab title="OCaml" %}
+
 ```ocaml
 # let rec is_even x =
     if x = 0 then true else is_odd (x - 1)
@@ -766,6 +873,7 @@ val is_odd : int -> bool = <fun>
 # List.map ~f:is_odd [0;1;2;3;4;5];;
 - : bool list = [false; true; false; true; false; true]
 ```
+
 {% endtab %}
 {% endtabs %}
 
@@ -832,24 +940,24 @@ The syntactic role of an operator is typically determined by its first character
 
 **Table 2.1. Precedence and associativity**
 
-| Operator prefix | Associativity |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `!`..., `?`..., `~`... | Prefix |
-| `.`, `.(`, `.[` | - |
-| function application, constructor, `assert`, `lazy` | Left associative |
-| `-`, `-.` | Prefix |
-| `**`..., `lsl`, `lsr`, `asr` | Right associative |
-| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative |
-| `+`..., `-`... | Left associative |
-| `::` | Right associative |
-| `@`..., `^`... | Right associative |
-| `=`..., `<`..., `>`..., `&#124;`..., `&`..., `$`... | Left associative |
-| `&`, `&&` | Right associative |
-| `or`, `&#124;&#124;` | Right associative |
-| `,` | - |
-| `<-`, `:=` | Right associative |
-| `if` | - |
-| `;` | Right associative |
+| Operator prefix                                                | Associativity     |
+| -------------------------------------------------------------- | ----------------- |
+| `!`..., `?`..., `~`...                                         | Prefix            |
+| `.`, `.(`, `.[`                                                | -                 |
+| function application, constructor, `assert`, `lazy`            | Left associative  |
+| `-`, `-.`                                                      | Prefix            |
+| `**`..., `lsl`, `lsr`, `asr`                                   | Right associative |
+| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor`           | Left associative  |
+| `+`..., `-`...                                                 | Left associative  |
+| `::`                                                           | Right associative |
+| `@`..., `^`...                                                 | Right associative |
+| `=`..., `<`..., `>`..., <code>&#124</code>;..., `&`..., `$`... | Left associative  |
+| `&`, `&&`                                                      | Right associative |
+| `or`, <code>&#124;&#124;</code>                                | Right associative |
+| `,`                                                            | -                 |
+| `<-`, `:=`                                                     | Right associative |
+| `if`                                                           | -                 |
+| `;`                                                            | Right associative |
 
 There's one important special case: `-` and `-.`, which are the integer and floating-point subtraction operators, and can act as both prefix operators \(for negation\) and infix operators \(for subtraction\). So, both `-x` and `x - y` are meaningful expressions. Another thing to remember about negation is that it has lower precedence than function application, which means that if you want to pass a negative value, you need to wrap it in parentheses, as you can see in this code:
 
@@ -1008,8 +1116,8 @@ ratio ~num ~denom;;- : float = 0.75
 
 Labeled arguments are useful in a few different cases:
 
-* When defining a function with lots of arguments. Beyond a certain number, arguments are easier to remember by name than by position.
-* When the meaning of a particular argument is unclear from the type alone. Consider a function for creating a hash table whose first argument is the initial size of the array backing the hash table, and the second is a Boolean flag, which indicates whether that array will ever shrink when elements are removed:
+- When defining a function with lots of arguments. Beyond a certain number, arguments are easier to remember by name than by position.
+- When the meaning of a particular argument is unclear from the type alone. Consider a function for creating a hash table whose first argument is the initial size of the array backing the hash table, and the second is a Boolean flag, which indicates whether that array will ever shrink when elements are removed:
 
   ```text
   val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
@@ -1024,7 +1132,7 @@ The signature makes it hard to divine the meaning of those two arguments. but wi
 
 Choosing label names well is especially important for Boolean values, since it's often easy to get confused about whether a value being true is meant to enable or disable a given feature.
 
-* When defining functions that have multiple arguments that might get confused with each other. This is most at issue when the arguments are of the same type. For example, consider this signature for a function that extracts a substring:
+- When defining functions that have multiple arguments that might get confused with each other. This is most at issue when the arguments are of the same type. For example, consider this signature for a function that extracts a substring:
 
   ```text
   val substring: string -> int -> int -> string
@@ -1038,7 +1146,7 @@ Here, the two `ints` are the starting position and length of the substring to ex
 
 This improves the readability of both the signature and of client code that makes use of `substring` and makes it harder to accidentally swap the position and the length.
 
-* When you want flexibility on the order in which arguments are passed. Consider a function like `List.iter`, which takes two arguments: a function and a list of elements to call that function on. A common pattern is to partially apply `List.iter` by giving it just the function, as in the following example from earlier in the chapter:
+- When you want flexibility on the order in which arguments are passed. Consider a function like `List.iter`, which takes two arguments: a function and a list of elements to call that function on. A common pattern is to partially apply `List.iter` by giving it just the function, as in the following example from earlier in the chapter:
 
   ```text
   #   String.split ~on:':' path
@@ -1281,4 +1389,3 @@ And indeed, when we provide the two positional arguments, the `sep` argument is 
 ```
 
 As you can see, OCaml's support for labeled and optional arguments is not without its complexities. But don't let these complexities obscure the usefulness of these features. Labels and optional arguments are very effective tools for making your APIs both more convenient and safer, and it's worth the effort of learning how to use them effectively.
-
