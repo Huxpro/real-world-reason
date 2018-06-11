@@ -4,7 +4,7 @@ Variables and functions are fundamental ideas that show up in virtually all prog
 
 Don't be discouraged if you find yourself overwhelmed by some of the details, especially toward the end of the chapter. The concepts here are important, but if they don't connect for you on your first read, you should return to this chapter after you've gotten a better sense for the rest of the language.
 
-## Variable
+## VARIABLES
 
 At its simplest, a variable is an identifier whose meaning is bound to a particular value. In OCaml these bindings are often introduced using the `let` keyword. We can type a so-called _top-level_ `let` binding with the following syntax. Note that variable names must start with a lowercase letter or an underscore: 
 
@@ -279,7 +279,7 @@ The answer to this is that variables in OCaml \(and generally in functional lang
 The same is true in a functional language. A function can be applied to different inputs, and thus its variables will take on different values, even without mutation.
 {% endhint %}
 
-## Pattern Matching and let
+### Pattern Matching and let
 
 Another useful feature of `let` bindings is that they support the use of _patterns_ on the lefthand side. Consider the following code, which uses `List.unzip`, a function for converting a list of pairs into a pair of lists:
 
@@ -295,7 +295,7 @@ let (ints, strings) = List.unzip([(1, "one"), (2, "two"), (3, "three")]);
 
 /* imagining this works in rtop */
 let ints: list(int) = [1, 2, 3];
-let strings: list(string) = ["one", "two", "three"]
+let strings: list(string) = ["one", "two", "three"];
 
 /* in try where code compiled to JS */
 Js.log(ints);     /* [1,[2,[3,0]]] */
@@ -315,6 +315,155 @@ val strings : string list = ["one"; "two"; "three"]
 Here, `(ints,strings)` is a pattern, and the `let` binding assigns values to both of the identifiers that show up in that pattern. A pattern is essentially a description of the shape of a data structure, where some components are identifiers to be bound. As we saw in [the section called “Tuples, Lists, Options, and Pattern Matching”](https://realworldocaml.org/v1/en/html/a-guided-tour.html#tuples-lists-options-and-pattern-matching), OCaml has patterns for a variety of different data types.
 
 Using a pattern in a `let` binding makes the most sense for a pattern that is _irrefutable_, _i.e._, where any value of the type in question is guaranteed to match the pattern. Tuple and record patterns are irrefutable, but list patterns are not. Consider the following code that implements a function for upper casing the first element of a comma-separated list:
+
+{% hint style="info" %}
+`Js` apis operates on array but we are demonstrating pattern matching against list here. So we have to convert between array and list back and forth. \(We'll provide a better sample in future\)
+{% endhint %}
+
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+let upcase_first_entry = line => {
+  let [first, ...rest] = Array.to_list(Js.String.split(",", line));
+  Js.Array.joinWith(
+    ",",
+    Array.of_list([Js.String.toUpperCase(first), ...rest]),
+  );
+};
+
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
+# let upcase_first_entry line =
+     let (first :: rest) = String.split ~on:',' line in
+     String.concat ~sep:"," (String.uppercase first :: rest)
+  ;;
+
+Characters 40-53:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+val upcase_first_entry : string -> string = <fun>
+```
+{% endtab %}
+{% endtabs %}
+
+This case can't really come up in practice, because `String.split` always returns a list with at least one element. But the compiler doesn't know this, and so it emits the warning. It's generally better to use a `match` statement to handle such cases explicitly:
+
+{% tabs %}
+{% tab title="First Tab" %}
+```rust
+let upcase_first_entry = line =>
+  switch (Array.to_list(Js.String.split(",", line))) {
+  | [] => assert false /* String.split returns at least one element */
+  | [first, ...rest] =>
+    Js.Array.joinWith(
+      ",",
+      Array.of_list([Js.String.toUpperCase(first), ...rest]),
+    )
+  };
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
+# let upcase_first_entry line =
+     match String.split ~on:',' line with
+     | [] -> assert false (* String.split returns at least one element *)
+     | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
+  ;;val upcase_first_entry : string -> string = <fun>
+```
+{% endtab %}
+{% endtabs %}
+
+Note that this is our first use of `assert`, which is useful for marking cases that should be impossible. We'll discuss `assert` in more detail in [Chapter 7, Error Handling](https://realworldocaml.org/v1/en/html/error-handling.html).
+
+## FUNCTIONS
+
+Given that OCaml is a functional language, it's no surprise that functions are important and pervasive. Indeed, functions have come up in almost every example we've done so far. This section will go into more depth, explaining the details of how OCaml's functions work. As you'll see, functions in OCaml differ in a variety of ways from what you'll find in most mainstream languages.
+
+### Anonymous Functions
+
+We'll start by looking at the most basic style of function declaration in OCaml: the _anonymous function_. An anonymous function is a function that is declared without being named. These can be declared using the `fun` keyword, as shown here:
+
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# (x) => x + 1;
+- : int => int = <fun>
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
+# (fun x -> x + 1);;
+- : int -> int = <fun>
+```
+{% endtab %}
+{% endtabs %}
+
+Anonymous functions operate in much the same way as named functions. For example, we can apply an anonymous function to an argument:
+
+```text
+# (fun x -> x + 1) 7;;
+- : int = 8
+```
+
+Or pass it to another function. Passing functions to iteration functions like `List.map` is probably the most common use case for anonymous functions:
+
+```text
+# List.map ~f:(fun x -> x + 1) [1;2;3];;
+- : int list = [2; 3; 4]
+```
+
+You can even stuff them into a data structure:
+
+```text
+# let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
+val increments : (int -> int) list = [<fun>; <fun>]
+# List.map ~f:(fun g -> g 5) increments;;
+- : int list = [6; 7]
+```
+
+It's worth stopping for a moment to puzzle this example out, since this kind of higher-order use of functions can be a bit obscure at first. Notice that `(fun g -> g 5)` is a function that takes a function as an argument, and then applies that function to the number `5`. The invocation of `List.map` applies `(fun g -> g 5)` to the elements of the `increments` list \(which are themselves functions\) and returns the list containing the results of these function applications.
+
+The key thing to understand is that functions are ordinary values in OCaml, and you can do everything with them that you'd do with an ordinary value, including passing them to and returning them from other functions and storing them in data structures. We even name functions in the same way that we name other values, by using a `let` binding:
+
+```text
+# let plusone = (fun x -> x + 1);;
+val plusone : int -> int = <fun>
+# plusone 3;;
+- : int = 4
+```
+
+Defining named functions is so common that there is some syntactic sugar for it. Thus, the following definition of `plusone` is equivalent to the previous definition:
+
+```text
+# let plusone x = x + 1;;
+val plusone : int -> int = <fun>
+```
+
+This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.
+
+{% hint style="success" %}
+### let and fun
+
+Functions and `let` bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent:
+
+```text
+# (fun x -> x + 1) 7;;
+- : int = 8
+# let x = 7 in x + 1;;
+- : int = 8
+```
+
+This connection is important, and will come up more when programming in a monadic style, as we'll see in [Chapter 18, Concurrent Programming with Async](https://realworldocaml.org/v1/en/html/concurrent-programming-with-async.html).
+{% endhint %}
 
 
 
