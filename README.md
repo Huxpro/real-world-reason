@@ -1,27 +1,33 @@
-# Initial page
+# Read Me
 
-## Getting Super Powers
+This project is not to introduce a new book. The goal is to simply translate \(almost\) all code \(if it's possible\) within the book "Real World OCaml" from OCaml to Reason.
 
-Becoming a super hero is a fairly straight forward process:
+### Real World OCaml? {#real-world-ocaml}
 
-```
-$ give me super-powers
-```
+"Real World OCaml" is a well-known, highly-praised and possibly "the only one you need" book for learning OCaml. The book has a [public html version](https://realworldocaml.org/v1/en/html/index.html), so we simply refer all text from there.
 
-{% hint style="info" %}
- Super-powers are granted randomly so please submit an issue if you're not happy with yours.
-{% endhint %}
+### Reason? {#reason}
 
-Once you're strong enough, save the world:
+If you haven't heard of Reason. From its own website:
 
-```
-// Ain't no code for that yet, sorry
-echo 'You got to trust me on this, I saved the world'
-```
+> What Is Reason?
+>
+> Reason is not a new language; it's a new syntax and toolchain powered by the battle-tested language, OCaml. Reason gives OCaml a familiar syntax geared toward JavaScript programmers, and caters to the existing NPM/Yarn workflow folks already know.
+>
+> In that regard, Reason can almost be considered as a solidly statically typed, faster and simpler cousin of JavaScript, minus the historical crufts, plus the features of ES2030 you can use today, and with access to both the JS and the OCaml ecosystem!
+>
+> Reason compiles to JavaScript thanks to our partner project, BuckleScript, which compiles OCaml/Reason into readable JavaScript with smooth interop. Reason also compiles to fast, barebone assembly, thanks to OCaml itself.
 
-> Variables and functions are fundamental ideas that show up in virtually all programming languages. OCaml has a different take on these concepts than most languages you're likely to have encountered, so this chapter will cover OCaml's approach to variables and functions in some detail, starting with the basics of how to define a variable, and ending with the intricacies of functions with labeled and optional arguments.
+### Then why a OCaml book in Reason? {#then-why-a-ocaml-book-in-reason}
 
-{% page-ref page="./" %}
+Although Reason is very similar to JavaScript in terms of syntax, and  
+"80% of OCaml's semantics \(aka how it runs\) already straightforwardly maps over to modern JavaScript and vice-versa", Reason still undoubtedly has its root and core in OCaml.
+
+Reason will keep going on to make it more and more friendly to JavaScript developers and to grow its own community, documents, tutorials, etc., but for now, people who only has JavaScript background and no OCaml background might still need a serious OCaml book to really understand how Reason \(OCaml\) works and how to think in Reason \(OCaml\).
+
+### How does the translation works? {#how-does-the-translation-works}
+
+{% page-ref page="conversion-guide.md" %}
 
 
 
