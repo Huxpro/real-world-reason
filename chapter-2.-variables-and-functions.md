@@ -843,9 +843,9 @@ The syntactic role of an operator is typically determined by its first character
 | `+`..., `-`... | Left associative |
 | `::` | Right associative |
 | `@`..., `^`... | Right associative |
-| `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative |
+| `=`..., `<`..., `>`..., `&#124;`..., `&`..., `$`... | Left associative |
 | `&`, `&&` | Right associative |
-| `or`, `||` | Right associative |
+| `or`, `&#124;&#124;` | Right associative |
 | `,` | - |
 | `<-`, `:=` | Right associative |
 | `if` | - |
