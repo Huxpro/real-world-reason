@@ -24,7 +24,6 @@ Here's a simple example:
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```ocaml
 # let x = 3;
 let x: int = 3;
@@ -33,11 +32,9 @@ let y: int = 4
 # let z = x + y;
 let z: int = 7
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let x = 3;;
 val x : int = 3
@@ -46,7 +43,6 @@ val y : int = 4
 # let z = x + y;;
 val z : int = 7
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -58,39 +54,34 @@ Reason turned `in` into `;` for visual familiarity, so you will use good old _bl
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```ocaml
 let <variable> = {
   <expr1>;
   <expr2>
 }
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 let <variable> = <expr1> in <expr2>
 ```
-
 {% endtab %}
 {% endtabs %}
 
-This first evaluates _`expr1`_ and then evaluates _`expr2`_ with _`variable`_ bound to whatever value was produced by the evaluation of _`expr1`_. Here's how it looks in practice
+This first evaluates `expr1` and then evaluates `expr2` with `variable` bound to whatever value was produced by the evaluation of `expr1`. Here's how it looks in practice
 
 {% hint style="info" %}
 Reason community embrace a different set of standard libraries provided by BuckleScript,
 
-- `Js` which binds directly to JavaScript APIs
-- `Belt`, a effort to provide a standard libraries crossing native and web platform.
+* `Js` which binds directly to JavaScript APIs
+* `Belt`, a effort to provide a standard libraries crossing native and web platform.
 
 We will use the most closed APIs we can find to demonstrate the same idea.
 {% endhint %}
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```ocaml
 let languages = "OCaml,Perl,C++,C";
 
@@ -99,11 +90,9 @@ let dashed_languages = {
   Js.Array.joinWith("-", language_list);
 };
 ```
-
 {% endtab %}
 
 {% tab title="OCaml \(de-reason\)" %}
-
 ```ocaml
 let languages = "OCaml,Perl,C++,C"
 
@@ -111,11 +100,9 @@ let dashed_languages =
   let language_list = Js.String.split "," languages in
   Js.Array.joinWith "-" language_list
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
@@ -125,7 +112,6 @@ val languages : string = "OCaml,Perl,C++,C"
   ;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -137,21 +123,17 @@ expression`Js.Array.joinWith("-", language_list);` in Reason sample.
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```swift
 Js.log(language_list);
 /* The value language_list can't be found */
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # language_list;;Characters -1-13:
 Error: Unbound value language_list
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -159,7 +141,6 @@ A `let` binding in an inner scope can _shadow_, or hide, the definition from an 
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```swift
 let languages = "OCaml,Perl,C++,C";
 
@@ -168,11 +149,9 @@ let dashed_languages = {
   Js.Array.joinWith("-", languages);
 };
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let languages = "OCaml,Perl,C++,C";;
 val languages : string = "OCaml,Perl,C++,C"
@@ -182,7 +161,6 @@ val languages : string = "OCaml,Perl,C++,C"
   ;;
 val dashed_languages : string = "OCaml-Perl-C++-C"
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -190,20 +168,16 @@ This time, in the inner scope we called the list of strings `languages` instead 
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```swift
 Js.log(languages);  /* "OCaml,Perl,C++,C" */
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # languages;;
 - : string = "OCaml,Perl,C++,C"
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -215,7 +189,6 @@ In Reason, we will simply use a anonymous block scope, which looks like a functi
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```swift
 # let area_of_ring = (inner_radius, outer_radius) => {
     let pi = acos(-1.);
@@ -226,11 +199,9 @@ let area_of_ring: (float, float) => float = <fun>;
 # area_of_ring(1., 3.);
 - : float = 25.1327412287183449
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let area_of_ring inner_radius outer_radius =
      let pi = acos (-1.) in
@@ -241,7 +212,6 @@ val area_of_ring : float -> float -> float = <fun>
 # area_of_ring 1. 3.;;
 - : float = 25.1327412287
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -249,7 +219,6 @@ It's important not to confuse a sequence of `let` bindings with the modification
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```swift
 # let area_of_ring = (inner_radius, outer_radius) => {
      let pi = acos(-1.);
@@ -262,11 +231,9 @@ Characters 125-127:
 Warning 26: unused variable pi.
 let area_of_ring: (float, float) => float = <fun>;
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let area_of_ring inner_radius outer_radius =
      let pi = acos (-1.) in
@@ -279,7 +246,6 @@ Characters 126-128:
 Warning 26: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -304,7 +270,6 @@ Thankfully, if you are using ES6 `let` rather than `var`, a `syntaxError` would 
 In OCaml, `let` bindings are immutable. There are many kinds of mutable values in OCaml, which we'll discuss in [Chapter 8, _Imperative Programming_](file:////Users/jsx/Google%20Drive/NOTES.d/reason/RealWorldReason/imperative-programming-1.html), but there are no mutable variables.
 
 {% hint style="success" %}
-
 ### Why Don't Variables Vary?
 
 One source of confusion for people new to OCaml is the fact that variables are immutable. This seems pretty surprising even on linguistic terms. Isn't the whole point of a variable that it can vary?
@@ -324,7 +289,6 @@ BuckleScript compiles Reason to JavaScript. Under the hood, it represents Reason
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```swift
 open Belt;
 let (ints, strings) = List.unzip([(1, "one"), (2, "two"), (3, "three")]);
@@ -337,17 +301,14 @@ let strings: list(string) = ["one", "two", "three"];
 Js.log(ints);     /* [1,[2,[3,0]]] */
 Js.log(strings);  /* ["one",["two",["three",0]]] */
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 val ints : int list = [1; 2; 3]
 val strings : string list = ["one"; "two"; "three"]
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -361,7 +322,6 @@ Using a pattern in a `let` binding makes the most sense for a pattern that is _i
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 let upcase_first_entry = line => {
   let [first, ...rest] = Array.to_list(Js.String.split(",", line));
@@ -375,11 +335,9 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let upcase_first_entry line =
      let (first :: rest) = String.split ~on:',' line in
@@ -392,7 +350,6 @@ Here is an example of a value that is not matched:
 []
 val upcase_first_entry : string -> string = <fun>
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -400,7 +357,6 @@ This case can't really come up in practice, because `String.split` always return
 
 {% tabs %}
 {% tab title="First Tab" %}
-
 ```rust
 let upcase_first_entry = line =>
   switch (Array.to_list(Js.String.split(",", line))) {
@@ -412,11 +368,9 @@ let upcase_first_entry = line =>
     )
   };
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # let upcase_first_entry line =
      match String.split ~on:',' line with
@@ -424,7 +378,6 @@ let upcase_first_entry = line =>
      | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
   ;;val upcase_first_entry : string -> string = <fun>
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -440,21 +393,17 @@ We'll start by looking at the most basic style of function declaration in OCaml:
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 # (x) => x + 1;
 - : int => int = <fun>
 ```
-
 {% endtab %}
 
 {% tab title="OCaml" %}
-
 ```ocaml
 # (fun x -> x + 1);;
 - : int -> int = <fun>
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -502,54 +451,34 @@ val plusone : int -> int = <fun>
 This is the most common and convenient way to declare a function, but syntactic niceties aside, the two styles of function definition are equivalent.
 
 {% hint style="success" %}
-
 ### let and fun
 
 Functions and `let` bindings have a lot to do with each other. In some sense, you can think of the parameter of a function as a variable being bound to the value passed by the caller. Indeed, the following two expressions are nearly equivalent:
+{% endhint %}
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# (x => x + 1)(7);
+- : int = 8
+# {let x = 7; x + 1};
+- : int = 8
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
 # (fun x -> x + 1) 7;;
 - : int = 8
 # let x = 7 in x + 1;;
 - : int = 8
 ```
-
-{% tabs %}
-{% tab title="Reason" %}
-
-```rust
-let upcase_first_entry = line => {
-  let [first, ...rest] = Array.to_list(Js.String.split(",", line));
-  Js.Array.joinWith(
-    ",",
-    Array.of_list([Js.String.toUpperCase(first), ...rest]),
-  );
-};
-
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
-```
-
-{% endtab %}
-
-{% tab title="OCaml" %}
-
-```ocaml
-# let upcase_first_entry line =
-     let (first :: rest) = String.split ~on:',' line in
-     String.concat ~sep:"," (String.uppercase first :: rest)
-  ;;
-
-Characters 40-53:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
-val upcase_first_entry : string -> string = <fun>
-```
-
 {% endtab %}
 {% endtabs %}
 
+{% hint style="success" %}
 This connection is important, and will come up more when programming in a monadic style, as we'll see in [Chapter 18, Concurrent Programming with Async](https://realworldocaml.org/v1/en/html/concurrent-programming-with-async.html).
 {% endhint %}
+
+
+

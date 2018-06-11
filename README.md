@@ -27,7 +27,7 @@ Reason will keep going on to make it more and more friendly to JavaScript develo
 
 ## How does this conversion works?
 
-{% page-ref page="conversion-guide.md" %}
+{% page-ref page="meta/conversion-guide.md" %}
 
 
 

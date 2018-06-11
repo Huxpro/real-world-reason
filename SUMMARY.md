@@ -5,5 +5,5 @@
 
 ## Meta
 
-* [Conversion Guide](conversion-guide.md)
+* [Conversion Guide](meta/conversion-guide.md)
 
