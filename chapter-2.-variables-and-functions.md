@@ -854,8 +854,11 @@ The syntactic role of an operator is typically determined by its first character
 There's one important special case: `-` and `-.`, which are the integer and floating-point subtraction operators, and can act as both prefix operators \(for negation\) and infix operators \(for subtraction\). So, both `-x` and `x - y` are meaningful expressions. Another thing to remember about negation is that it has lower precedence than function application, which means that if you want to pass a negative value, you need to wrap it in parentheses, as you can see in this code:
 
 ```text
-# Int.max 3 (-4);;- : int = 3
-# Int.max 3 -4;;Characters -1-9:
+# Int.max 3 (-4);;
+- : int = 3
+# Int.max 3 -4;;
+
+Characters -1-9:
 Error: This expression has type int -> int
        but an expression was expected of type int
 ```
