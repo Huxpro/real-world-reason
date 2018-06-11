@@ -13,28 +13,42 @@ see [https://github.com/facebook/reason/issues/1356](https://github.com/facebook
 {% tabs %}
 {% tab title="Reason" %}
 ```swift
-let result = Js.(
-  [|1, 2, 3, 4|]
-  |> Array.filter(x => x > 2)
-  |> Array.mapi((x, i) => x + i)
-  |> Array.reduce((x, y) => x + y, 0)
-)
+let languages = "OCaml,Perl,C++,C";
+
+let dashed_languages = {
+  let language_list = Js.String.split(",", languages);
+  Js.Array.joinWith("-", language_list);
+};
+```
+{% endtab %}
+
+{% tab title="OCaml \(de-reason\)" %}
+```ocaml
+let languages = "OCaml,Perl,C++,C"
+
+let dashed_languages =
+  let language_list = Js.String.split "," languages in
+  Js.Array.joinWith "-" language_list
 ```
 {% endtab %}
 
 {% tab title="OCaml" %}
 ```ocaml
-let result = Js.(
-  [|1; 2; 3; 4|]
-  |> Array.filter (fun x -> x > 2)
-  |> Array.mapi (fun x i -> x + i)
-  |> Array.reduce (fun x y -> x + y) 0
-)
+let languages = "OCaml,Perl,C++,C";;
+
+let dashed_languages =
+  let language_list = String.split languages ~on:',' in
+  String.concat ~sep:"-" language_list
+;;
 ```
 {% endtab %}
 {% endtabs %}
 
-Noticed that the codes in **OCaml** tab are always copied from book and remain unchanged. **It is NOT the OCaml code the Reason one will convert to.**
+Noticed that:
+
+* Codes in **OCaml** tab must be copied from book and remain unchanged. 
+* Codes in **Reason** will demonstrate the same idea but the library using tends to vary by replacing to `Belt` or `Js` to follow the Reason community.
+* An **OCaml \(de-reason\)** might be provided for special explanation needs.
 
 ## Using Paragraph rather than Quote for "Real World OCaml" text
 
@@ -42,7 +56,7 @@ One of the principle of this project is make the whole thing highly readable as 
 
 ## Provide hints for any Reason variance
 
-However, for any notably variance,  a Tips using Gitbook's **hint** need to be given to elaborate the difference. For example:
+However, for any notably variance,  a Tips using Gitbook's **hint** will to be given to elaborate the difference. For example:
 
 {% hint style="info" %}
 **Reason** is pronounced differently with OCaml, obviously. 
@@ -50,7 +64,7 @@ However, for any notably variance,  a Tips using Gitbook's **hint** need to be g
 
 ## Reason hints before code sample
 
-To not confuse our readers, we should always provide hints about Reason variance before using these variances in our code snippet.
+To not confuse our readers, we should always provide hints about Reason variance before using these variances in our code snippet. This can help our readers noticing the difference and building the prerequisites to understand the code.
 
 
 

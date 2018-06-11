@@ -36,7 +36,7 @@ let z: int = 7
 ```
 {% endtab %}
 
-{% tab title="Second Tab" %}
+{% tab title="OCaml" %}
 ```ocaml
 # let x = 3;;
 val x : int = 3
