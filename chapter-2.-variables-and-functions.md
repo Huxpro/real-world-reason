@@ -728,10 +728,6 @@ Note that in the code, the pattern `| [] | [_]` is what's called an _or-pattern_
 
 We can also define multiple mutually recursive values by using `let rec` combined with the `and`keyword. Here's a \(gratuitously inefficient\) example:
 
-```text
-
-```
-
 {% tabs %}
 {% tab title="Reason" %}
 ```rust
