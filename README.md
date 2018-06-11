@@ -2,11 +2,11 @@
 
 This project is not to introduce a new book. The goal is to simply convert \(almost\) all code \(if it's possible\) within the book "Real World OCaml" from OCaml to Reason, plus necessary explanations on how Reason varies.
 
-### Real World OCaml? {#real-world-ocaml}
+## Real World OCaml?
 
 "Real World OCaml" is a well-known, highly-praised and possibly "the only one you need" book for learning OCaml. The book has a [public html version](https://realworldocaml.org/v1/en/html/index.html), so we simply refer all text from there.
 
-### Reason? {#reason}
+## Reason?
 
 If you haven't heard of Reason. From its own website:
 
@@ -18,14 +18,14 @@ If you haven't heard of Reason. From its own website:
 >
 > Reason compiles to JavaScript thanks to our partner project, BuckleScript, which compiles OCaml/Reason into readable JavaScript with smooth interop. Reason also compiles to fast, barebone assembly, thanks to OCaml itself.
 
-### Then why an OCaml book in Reason? {#then-why-a-ocaml-book-in-reason}
+## Then why an OCaml book in Reason?
 
 Although Reason is very similar to JavaScript in terms of syntax, and  
 "80% of OCaml's semantics \(aka how it runs\) already straightforwardly maps over to modern JavaScript and vice-versa", Reason still undoubtedly has its root and core in OCaml.
 
 Reason will keep going on to make it more and more friendly to JavaScript developers and to grow its own community, documents, tutorials, etc., but for now, people who only has JavaScript background and/or no OCaml background might still need a serious OCaml book to really understand how Reason \(OCaml\) works and how to think in Reason \(OCaml\).
 
-### How does this conversion works? {#how-does-the-translation-works}
+## How does this conversion works?
 
 {% page-ref page="conversion-guide.md" %}
 
