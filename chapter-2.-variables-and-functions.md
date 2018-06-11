@@ -17,9 +17,7 @@ As we'll see when we get to the module system in [Chapter 4, Files, Modules, and
 Every variable binding has a _scope_, which is the portion of the code that can refer to that binding. When using **utop**, the scope of a top-level `let` binding is everything that follows it in the session. When it shows up in a module, the scope is the remainder of that module.
 
 {% hint style="info" %}
-Reason comes with a REPL called **rtop** built on top of **utop**. Unfortunately, rtop doesn't work easily with packages and externals. You can use the [**Try**](https://reasonml.github.io/en/try.html%20) for our Reason snippets when some external modules are required.
-
-Besides, Reason also use a different set of standard libraries provided by BuckleScript, especially `Js` which binds directly to JavaScript APIs and `Belt`,  a effort to provide a standard libraries crossing native and web platform. We will use the most closed APIs there to replace the OCaml ones.
+Reason comes with a REPL called **rtop**. Unfortunately, rtop doesn't work easily with packages and externals. You are suggested to use the [**Try**](https://reasonml.github.io/en/try.html%20) for our Reason snippets when external modules are used.
 {% endhint %}
 
 Here's a simple example:
@@ -71,7 +69,16 @@ let <variable> = <expr1> in <expr2>
 {% endtab %}
 {% endtabs %}
 
-This first evaluates _`expr1`_ and then evaluates _`expr2`_ with _`variable`_ bound to whatever value was produced by the evaluation of _`expr1`_. Here's how it looks in practice:0 comments
+This first evaluates _`expr1`_ and then evaluates _`expr2`_ with _`variable`_ bound to whatever value was produced by the evaluation of _`expr1`_. Here's how it looks in practice
+
+{% hint style="info" %}
+Reason community embrace a different set of standard libraries provided by BuckleScript, 
+
+* `Js` which binds directly to JavaScript APIs 
+* `Belt`,  a effort to provide a standard libraries crossing native and web platform. 
+
+We will use the most closed APIs we can find  to demonstrate the same idea.
+{% endhint %}
 
 {% tabs %}
 {% tab title="Reason" %}
