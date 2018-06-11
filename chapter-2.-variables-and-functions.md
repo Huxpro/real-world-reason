@@ -543,71 +543,177 @@ Functions and `let` bindings have a lot to do with each other. In some sense, yo
 This connection is important, and will come up more when programming in a monadic style, as we'll see in [Chapter 18, Concurrent Programming with Async](https://realworldocaml.org/v1/en/html/concurrent-programming-with-async.html).
 {% endhint %}
 
-## Multiargument functions
+### Multiargument functions
 
 OCaml of course also supports multiargument functions, such as:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# let abs_diff = (x, y) => abs(x - y);
+let abs_diff: (int, int) => int = <fun>;
+# abs_diff(3, 4);
+- : int = 1
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
 # let abs_diff x y = abs (x - y);;
 val abs_diff : int -> int -> int = <fun>
 # abs_diff 3 4;;
 - : int = 1
 ```
+{% endtab %}
+{% endtabs %}
+
 
 You may find the type signature of `abs_diff` with all of its arrows a little hard to parse. To understand what's going on, let's rewrite `abs_diff` in an equivalent form, using the `fun`keyword:
 
-```text
+{% hint style="info" %}
+Reason embrace C-style syntax, but it's still curried under the hood.
+{% endhint %}
+
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# let abs_diff = (x) => ((y) => abs(x - y));
+let abs_diff: (int, int) => int = <fun>;
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
 # let abs_diff =
     (fun x -> (fun y -> abs (x - y)));;
 val abs_diff : int -> int -> int = <fun>
 ```
+{% endtab %}
+{% endtabs %}
+
 
 This rewrite makes it explicit that `abs_diff` is actually a function of one argument that returns another function of one argument, which itself returns the final result. Because the functions are nested, the inner expression `abs (x - y)` has access to both `x`, which was bound by the outer function application, and `y`, which was bound by the inner one.
 
 This style of function is called a _curried_ function. \(Currying is named after Haskell Curry, a logician who had a significant impact on the design and theory of programming languages.\) The key to interpreting the type signature of a curried function is the observation that `->` is right-associative. The type signature of `abs_diff` can therefore be parenthesized as follows:
 
-```text
+
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+let abs_diff : int => (int => int)
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
 val abs_diff : int -> (int -> int)
 ```
+{% endtab %}
+{% endtabs %}
 
 The parentheses don't change the meaning of the signature, but they make it easier to see the currying.
 
 Currying is more than just a theoretical curiosity. You can make use of currying to specialize a function by feeding in some of the arguments. Here's an example where we create a specialized version of `abs_diff` that measures the distance of a given number from `3`:
 
 ```text
-# let dist_from_3 = abs_diff 3;;val dist_from_3 : int -> int = <fun>
-# dist_from_3 8;;- : int = 5
-# dist_from_3 (-1);;- : int = 4
 ```
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# let dist_from_3 = abs_diff(3);
+let dist_from_3: int => int = <fun>;
+# dist_from_3(8);
+- : int = 5
+# dist_from_3(-1);
+- : int = 4
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
+# let dist_from_3 = abs_diff 3;;
+val dist_from_3 : int -> int = <fun>
+# dist_from_3 8;;
+- : int = 5
+# dist_from_3 (-1);;
+- : int = 4
+```
+{% endtab %}
+{% endtabs %}
+
 
 The practice of applying some of the arguments of a curried function to get a new function is called _partial application_.
 
 Note that the `fun` keyword supports its own syntax for currying, so the following definition of`abs_diff` is equivalent to the previous one.
 
-```text
-# let abs_diff = (fun x y -> abs (x - y));;val abs_diff : int -> int -> int = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# let abs_diff = (x, y) => abs(x - y);
+let abs_diff: (int, int) => int = <fun>;
 ```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
+# let abs_diff = (fun x y -> abs (x - y));;
+val abs_diff : int -> int -> int = <fun>
+```
+{% endtab %}
+{% endtabs %}
+
 
 You might worry that curried functions are terribly expensive, but this is not the case. In OCaml, there is no penalty for calling a curried function with all of its arguments. \(Partial application, unsurprisingly, does have a small extra cost.\)
 
 Currying is not the only way of writing a multiargument function in OCaml. It's also possible to use the different parts of a tuple as different arguments. So, we could write:
 
-```text
-# let abs_diff (x,y) = abs (x - y);;val abs_diff : int * int -> int = <fun>
-# abs_diff (3,4);;- : int = 1
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+let abs_diff = ((x, y)) => abs(x - y);
+let abs_diff: ((int, int)) => int = <fun>;
 ```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
+# let abs_diff (x,y) = abs (x - y);;
+val abs_diff : int * int -> int = <fun>
+# abs_diff (3,4);;
+- : int = 1
+```
+{% endtab %}
+{% endtabs %}
 
 OCaml handles this calling convention efficiently as well. In particular it does not generally have to allocate a tuple just for the purpose of sending arguments to a tuple-style function. You can't, however, use partial application for this style of function.
 
 There are small trade-offs between these two approaches, but most of the time, one should stick to currying, since it's the default style in the OCaml world.
 
-## Recursive Functions
+### Recursive Functions
 
 A function is _recursive_ if it refers to itself in its definition. Recursion is important in any programming language, but is particularly important in functional languages, because it is the way that you build looping constructs. \(As will be discussed in more detail in [Chapter 8, Imperative Programming](https://realworldocaml.org/v1/en/html/imperative-programming-1.html), OCaml also supports imperative looping constructs like `for` and `while`, but these are only useful when using OCaml's imperative features.\)
 
 In order to define a recursive function, you need to mark the `let` binding as recursive with the `rec` keyword, as shown in this function for finding the first sequentially repeated element in a list:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# let rec find_first_stutter = (list) =>
+    switch list {
+    | [] | [_] => None  /* only zero or one elements, so no repeats */
+    | [x, y, ...tl] =>
+      if (x == y) {
+        Some(x);
+      } else {
+        find_first_stutter([y, ...tl]);
+      }
+    };
+let find_first_stutter: list('a) => option('a) = <fun>;
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
 # let rec find_first_stutter list =
     match list with
     | [] | [_] ->
@@ -615,23 +721,61 @@ In order to define a recursive function, you need to mark the `let` binding as r
       None
     | x :: y :: tl ->
       if x = y then Some x else find_first_stutter (y::tl)
-   ;;val find_first_stutter : 'a list -> 'a option = <fun>
+   ;;
+val find_first_stutter : 'a list -> 'a option = <fun>
 ```
+{% endtab %}
+{% endtabs %}
+
 
 Note that in the code, the pattern `| [] | [_]` is what's called an _or-pattern_, which is a disjunction of two patterns, meaning that it will be considered a match if either pattern matches. In this case, `[]` matches the empty list, and `[_]` matches any single element list. The `_` is there so we don't have to put an explicit name on that single element.
 
 We can also define multiple mutually recursive values by using `let rec` combined with the `and`keyword. Here's a \(gratuitously inefficient\) example:
 
 ```text
+```
+
+{% tabs %}
+{% tab title="Reason" %}
+```rust
+# let rec is_even = (x) =>
+    if (x == 0) {
+      true;
+    } else {
+      is_odd(x - 1);
+    }
+  and is_odd = (x) =>
+    if (x == 0) {
+      false;
+    } else {
+      is_even(x - 1);
+    };
+let is_even: int => bool = <fun>;
+let is_odd: int => bool = <fun>;
+# List.map(is_even, [0, 1, 2, 3, 4, 5]);
+- : list(bool) = [true, false, true, false, true, false]
+# List.map(is_odd, [0, 1, 2, 3, 4, 5]);
+- : list(bool) = [false, true, false, true, false, true]
+```
+{% endtab %}
+
+{% tab title="OCaml" %}
+```ocaml
 # let rec is_even x =
     if x = 0 then true else is_odd (x - 1)
   and is_odd x =
     if x = 0 then false else is_even (x - 1)
- ;;val is_even : int -> bool = <fun>
+ ;;
+val is_even : int -> bool = <fun>
 val is_odd : int -> bool = <fun>
-# List.map ~f:is_even [0;1;2;3;4;5];;- : bool list = [true; false; true; false; true; false]
-# List.map ~f:is_odd [0;1;2;3;4;5];;- : bool list = [false; true; false; true; false; true]
+# List.map ~f:is_even [0;1;2;3;4;5];;
+- : bool list = [true; false; true; false; true; false]
+# List.map ~f:is_odd [0;1;2;3;4;5];;
+- : bool list = [false; true; false; true; false; true]
 ```
+{% endtab %}
+{% endtabs %}
+
 
 
 
@@ -641,13 +785,15 @@ But this decision has some good effects. For one thing, recursive \(and especial
 
 In addition, having a nonrecursive form makes it easier to create a new definition that extends and supersedes an existing one by shadowing it.
 
-## Prefix and Infix Operators
+### Prefix and Infix Operators
 
 So far, we've seen examples of functions used in both prefix and infix style:
 
 ```text
-# Int.max 3 4  (* prefix *);;- : int = 4
-# 3 + 4        (* infix  *);;- : int = 7
+# Int.max 3 4  (* prefix *);;
+- : int = 4
+# 3 + 4        (* infix  *);;
+- : int = 7
 ```
 
 
@@ -655,8 +801,10 @@ So far, we've seen examples of functions used in both prefix and infix style:
 You might not have thought of the second example as an ordinary function, but it very much is. Infix operators like `+` really only differ syntactically from other functions. In fact, if we put parentheses around an infix operator, you can use it as an ordinary prefix function:
 
 ```text
-# (+) 3 4;;- : int = 7
-# List.map ~f:((+) 3) [4;5;6];;- : int list = [7; 8; 9]
+# (+) 3 4;;
+- : int = 7
+# List.map ~f:((+) 3) [4;5;6];;
+- : int list = [7; 8; 9]
 ```
 
 
@@ -676,8 +824,10 @@ A function is treated syntactically as an operator if the name of that function 
 We can define \(or redefine\) the meaning of an operator. Here's an example of a simple vector-addition operator on `int` pairs:
 
 ```text
-# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;val ( +! ) : int * int -> int * int -> int * int = <fun>
-# (3,2) +! (-2,4);;- : int * int = (1, 6)
+# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
+val ( +! ) : int * int -> int * int -> int * int = <fun>
+# (3,2) +! (-2,4);;
+- : int * int = (1, 6)
 ```
 
 
@@ -705,23 +855,23 @@ The syntactic role of an operator is typically determined by its first character
 **Table 2.1. Precedence and associativity**
 
 | Operator prefix | Associativity |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `!`..., `?`..., `~`... | Prefix |
-| `.`, `.(`, `.[` | - |
-| function application, constructor, `assert`, `lazy` | Left associative |
-| `-`, `-.` | Prefix |
-| `**`..., `lsl`, `lsr`, `asr` | Right associative |
-| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative |
-| `+`..., `-`... | Left associative |
-| `::` | Right associative |
-| `@`..., `^`... | Right associative |
-| `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative |
-| `&`, `&&` | Right associative |
-| `or`, `||` | Right associative |
-| `,` | - |
-| `<-`, `:=` | Right associative |
-| `if` | - |
-| `;` | Right associative |
+| --------------- | ------------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined ||  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `!`..., `?`..., `~`...                               | Prefix            |
+| `.`, `.(`, `.[`                                      | -                 |
+| function application, constructor, `assert`, `lazy`  | Left associative  |
+| `-`, `-.`                                            | Prefix            |
+| `**`..., `lsl`, `lsr`, `asr`                         | Right associative |
+| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative  |
+| `+`..., `-`...                                       | Left associative  |
+| `::`                                                 | Right associative |
+| `@`..., `^`...                                       | Right associative |
+| `=`..., `<`..., `>`..., `|`..., `&`..., `$`...       | Left associative  |
+| `&`, `&&`                                            | Right associative |
+| `or`, `||`                                           | Right associative |
+| `,`                                                  | -                 |
+| `<-`, `:=`                                           | Right associative |
+| `if`                                                 | -                 |
+| `;`                                                  | Right associative |
 
 
 
@@ -836,7 +986,7 @@ The type error is a little bewildering at first glance. What's going on is that,
 The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.  
 
 
-## Declaring Functions with Function
+### Declaring Functions with Function
 
 Another way to define a function is using the `function` keyword. Instead of having syntactic support for declaring multiargument \(curried\) functions, `function` has built-in pattern matching. Here's an example:
 
@@ -877,7 +1027,7 @@ We can also combine the different styles of function declaration together, as in
 
 Also, note the use of partial application to generate the function passed to `List.map`. In other words, `some_or_default 100` is a function that was created by feeding just the first argument to `some_or_default`.
 
-## Labeled Arguments
+### Labeled Arguments
 
 Up until now, the functions we've defined have specified their arguments positionally, _i.e._, by the order in which the arguments are passed to the function. OCaml also supports labeled arguments, which let you identify a function argument by name. Indeed, we've already encountered functions from Core like `List.map` that use labeled arguments. Labeled arguments are marked by a leading tilde, and a label \(followed by a colon\) is put in front of the variable to be labeled. Here's an example:
 
@@ -913,7 +1063,6 @@ Labeled arguments are useful in a few different cases:
   val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
   ```
 
-  OCaml ∗ [variables-and-functions/htable\_sig1.ml](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/htable_sig1.ml) ∗ [all code](http://github.com/realworldocaml/examples/)
 
   The signature makes it hard to divine the meaning of those two arguments. but with labeled arguments, we can make the intent immediately clear:
 
@@ -922,7 +1071,6 @@ Labeled arguments are useful in a few different cases:
     init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
   ```
 
-  OCaml ∗ [variables-and-functions/htable\_sig2.ml](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/htable_sig2.ml) ∗ [all code](http://github.com/realworldocaml/examples/)
 
   Choosing label names well is especially important for Boolean values, since it's often easy to get confused about whether a value being true is meant to enable or disable a given feature.
 
@@ -932,7 +1080,6 @@ Labeled arguments are useful in a few different cases:
   val substring: string -> int -> int -> string
   ```
 
-  OCaml ∗ [variables-and-functions/substring\_sig1.ml](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/substring_sig1.ml) ∗ [all code](http://github.com/realworldocaml/examples/)
 
   Here, the two `ints` are the starting position and length of the substring to extract, respectively. We can make this fact more obvious from the signature by adding labeled:
 
@@ -940,7 +1087,6 @@ Labeled arguments are useful in a few different cases:
   val substring: string -> pos:int -> len:int -> string
   ```
 
-  OCaml ∗ [variables-and-functions/substring\_sig2.ml](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/substring_sig2.ml) ∗ [all code](http://github.com/realworldocaml/examples/)
 
   This improves the readability of both the signature and of client code that makes use of `substring` and makes it harder to accidentally swap the position and the length.
 
@@ -959,11 +1105,10 @@ Labeled arguments are useful in a few different cases:
   - : unit = ()
   ```
 
-  OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 43\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
   This requires that we put the function argument first. In other cases, you want to put the function argument second. One common reason is readability. In particular, a multiline function passed as an argument to another function is easiest to read when it is the final argument to that function.
 
-## Higher-order functions and labels
+### Higher-order functions and labels
 
 One surprising gotcha with labeled arguments is that while order doesn't matter when calling a function with labeled arguments, it does matter in a higher-order context, _e.g._, when passing a function with labeled arguments to another function. Here's an example:
 
@@ -971,7 +1116,6 @@ One surprising gotcha with labeled arguments is that while order doesn't matter 
 # let apply_to_tuple f (first,second) = f ~first ~second;;val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 44\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 Here, the definition of `apply_to_tuple` sets up the expectation that its first argument is a function with two labeled arguments, `first` and `second`, listed in that order. We could have defined `apply_to_tuple` differently to change the order in which the labeled arguments were listed:
 
@@ -979,7 +1123,6 @@ Here, the definition of `apply_to_tuple` sets up the expectation that its first 
 # let apply_to_tuple_2 f (first,second) = f ~second ~first;;val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 45\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 It turns out this order matters. In particular, if we define a function that has a different order
 
@@ -987,7 +1130,6 @@ It turns out this order matters. In particular, if we define a function that has
 # let divide ~first ~second = first / second;;val divide : first:int -> second:int -> int = <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 46\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 we'll find that it can't be passed in to `apply_to_tuple_2`.
 
@@ -997,7 +1139,6 @@ Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 47\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 But, it works smoothly with the original `apply_to_tuple`:
 
@@ -1006,11 +1147,10 @@ But, it works smoothly with the original `apply_to_tuple`:
 # apply_to_tuple divide (3,4);;- : int = 0
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 48\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 As a result, when passing labeled functions as arguments, you need to take care to be consistent in your ordering of labeled arguments.
 
-## Optional Arguments
+### Optional Arguments
 
 An optional argument is like a labeled argument that the caller can choose whether or not to provide. Optional arguments are passed in using the same syntax as labeled arguments, and, like labeled arguments, can be provided in any order.
 
@@ -1025,7 +1165,6 @@ Here's an example of a string concatenation function with an optional separator.
 # concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;- : string = "foo:bar"
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 49\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 Here, `?` is used in the definition of the function to mark `sep` as optional. And while the caller can pass a value of type `string` for `sep`, internally to the function, `sep` is seen as a `string option`, with `None` appearing when `sep` is not provided by the caller.
 
@@ -1035,7 +1174,6 @@ The preceding example needed a bit of boilerplate to choose a default separator 
 # let concat ?(sep="") x y = x ^ sep ^ y ;;val concat : ?sep:string -> string -> string -> string = <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 50\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 Optional arguments are very useful, but they're also easy to abuse. The key advantage of optional arguments is that they let you write functions with multiple arguments that users can ignore most of the time, only worrying about them when they specifically want to invoke those options. They also allow you to extend an API with new functionality without changing existing code.
 
@@ -1043,7 +1181,7 @@ The downside is that the caller may be unaware that there is a choice to be made
 
 This means that rarely used functions should not have optional arguments. A good rule of thumb is to avoid optional arguments for functions internal to a module, _i.e._, functions that are not included in the module's interface, or `mli` file. We'll learn more about `mli`s in [Chapter 4, Files, Modules, and Programs](https://realworldocaml.org/v1/en/html/files-modules-and-programs.html).
 
-## Explicit passing of an optional argument
+### Explicit passing of an optional argument
 
 Under the covers, a function with an optional argument receives `None` when the caller doesn't provide the argument, and `Some` when it does. But the `Some` and `None` are normally not explicitly passed in by the caller.
 
@@ -1054,7 +1192,6 @@ But sometimes, passing in `Some` or `None` explicitly is exactly what you want. 
 # concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;- : string = "foo:bar"
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 51\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 And the following two lines are equivalent ways of calling `concat` without specifying `sep`:
 
@@ -1063,7 +1200,6 @@ And the following two lines are equivalent ways of calling `concat` without spec
 # concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;- : string = "foobar"
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 52\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 One use case for this is when you want to define a wrapper function that mimics the optional arguments of the function it's wrapping. For example, imagine we wanted to create a function called `uppercase_concat`, which is the same as `concat` except that it converts the first string that it's passed to uppercase. We could write the function as follows:
 
@@ -1073,7 +1209,6 @@ One use case for this is when you want to define a wrapper function that mimics 
 # uppercase_concat "foo" "bar" ~sep:":";;- : string = "FOO:bar"
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 53\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 In the way we've written it, we've been forced to separately make the decision as to what the default separator is. Thus, if we later change `concat`'s default behavior, we'll need to remember to change `uppercase_concat` to match it.
 
@@ -1083,11 +1218,10 @@ Instead, we can have `uppercase_concat` simply pass through the optional argumen
 # let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 54\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 Now, if someone calls `uppercase_concat` without an argument, an explicit `None` will be passed to `concat`, leaving `concat` to decide what the default behavior should be.
 
-## Inference of labeled and optional arguments
+### Inference of labeled and optional arguments
 
 One subtle aspect of labeled and optional arguments is how they are inferred by the type system. Consider the following example for computing numerical derivatives of a function of two real variables. The function takes an argument `delta`, which determines the scale at which to compute the derivative; values `x` and `y`, which determine at which point to compute the derivative; and the function `f`, whose derivative is being computed. The function `f` itself takes two labeled arguments, `x` and `y`. Note that you can use an apostrophe as part of a variable name, so `x'` and `y'` are just ordinary variables:
 
@@ -1105,7 +1239,6 @@ One subtle aspect of labeled and optional arguments is how they are inferred by 
   <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 55\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 In principle, it's not obvious how the order of the arguments to `f` should be chosen. Since labeled arguments can be passed in arbitrary order, it seems like it could as well be `y:float -> x:float -> float` as it is `x:float -> y:float -> float`.
 
@@ -1117,7 +1250,6 @@ val numeric_deriv :
   x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float
 ```
 
-OCaml ∗ [variables-and-functions/numerical\_deriv\_alt\_sig.mli](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/numerical_deriv_alt_sig.mli) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 Since there are multiple plausible types to choose from, OCaml needs some heuristic for choosing between them. The heuristic the compiler uses is to prefer labels to options and to choose the order of arguments that shows up in the source code.
 
@@ -1137,7 +1269,6 @@ in an order different from other calls.
 This is only allowed when the real type is known.
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 56\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 As suggested by the error message, we can get OCaml to accept the fact that `f` is used with different argument orders if we provide explicit type information. Thus, the following code compiles without error, due to the type annotation on `f`:
 
@@ -1155,9 +1286,8 @@ As suggested by the error message, we can get OCaml to accept the fact that `f` 
   <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 57\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
-## Optional arguments and partial application
+### Optional arguments and partial application
 
 Optional arguments can be tricky to think about in the presence of partial application. We can of course partially apply the optional argument itself:
 
@@ -1166,7 +1296,6 @@ Optional arguments can be tricky to think about in the presence of partial appli
 # colon_concat "a" "b";;- : string = "a:b"
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 58\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 But what happens if we partially apply just the first argument?
 
@@ -1175,7 +1304,6 @@ But what happens if we partially apply just the first argument?
 # prepend_pound "a BASH comment";;- : string = "# a BASH comment"
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 59\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 The optional argument `?sep` has now disappeared, or been _erased_. Indeed, if we try to pass in that optional argument now, it will be rejected:
 
@@ -1185,7 +1313,6 @@ Error: This function has type string -> string
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 60\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 So when does OCaml decide to erase an optional argument?
 
@@ -1195,7 +1322,6 @@ The rule is: an optional argument is erased as soon as the first positional \(i.
 # let concat x ?(sep="") y = x ^ sep ^ y ;;val concat : string -> ?sep:string -> string -> string = <fun>
 ```
 
-OCaml Utop ∗ [variables-and-functions/main.topscript](http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript) , continued \(part 61\) ∗ [all code](http://github.com/realworldocaml/examples/)
 
 then application of the first argument would not cause the optional argument to be erased.
 
