@@ -567,7 +567,6 @@ val abs_diff : int -> int -> int = <fun>
 {% endtab %}
 {% endtabs %}
 
-
 You may find the type signature of `abs_diff` with all of its arrows a little hard to parse. To understand what's going on, let's rewrite `abs_diff` in an equivalent form, using the `fun`keyword:
 
 {% hint style="info" %}
@@ -591,11 +590,9 @@ val abs_diff : int -> int -> int = <fun>
 {% endtab %}
 {% endtabs %}
 
-
 This rewrite makes it explicit that `abs_diff` is actually a function of one argument that returns another function of one argument, which itself returns the final result. Because the functions are nested, the inner expression `abs (x - y)` has access to both `x`, which was bound by the outer function application, and `y`, which was bound by the inner one.
 
 This style of function is called a _curried_ function. \(Currying is named after Haskell Curry, a logician who had a significant impact on the design and theory of programming languages.\) The key to interpreting the type signature of a curried function is the observation that `->` is right-associative. The type signature of `abs_diff` can therefore be parenthesized as follows:
-
 
 {% tabs %}
 {% tab title="Reason" %}
@@ -616,7 +613,9 @@ The parentheses don't change the meaning of the signature, but they make it easi
 Currying is more than just a theoretical curiosity. You can make use of currying to specialize a function by feeding in some of the arguments. Here's an example where we create a specialized version of `abs_diff` that measures the distance of a given number from `3`:
 
 ```text
+
 ```
+
 {% tabs %}
 {% tab title="Reason" %}
 ```rust
@@ -641,7 +640,6 @@ val dist_from_3 : int -> int = <fun>
 {% endtab %}
 {% endtabs %}
 
-
 The practice of applying some of the arguments of a curried function to get a new function is called _partial application_.
 
 Note that the `fun` keyword supports its own syntax for currying, so the following definition of`abs_diff` is equivalent to the previous one.
@@ -661,7 +659,6 @@ val abs_diff : int -> int -> int = <fun>
 ```
 {% endtab %}
 {% endtabs %}
-
 
 You might worry that curried functions are terribly expensive, but this is not the case. In OCaml, there is no penalty for calling a curried function with all of its arguments. \(Partial application, unsurprisingly, does have a small extra cost.\)
 
@@ -727,12 +724,12 @@ val find_first_stutter : 'a list -> 'a option = <fun>
 {% endtab %}
 {% endtabs %}
 
-
 Note that in the code, the pattern `| [] | [_]` is what's called an _or-pattern_, which is a disjunction of two patterns, meaning that it will be considered a match if either pattern matches. In this case, `[]` matches the empty list, and `[_]` matches any single element list. The `_` is there so we don't have to put an explicit name on that single element.
 
 We can also define multiple mutually recursive values by using `let rec` combined with the `and`keyword. Here's a \(gratuitously inefficient\) example:
 
 ```text
+
 ```
 
 {% tabs %}
@@ -776,9 +773,6 @@ val is_odd : int -> bool = <fun>
 {% endtab %}
 {% endtabs %}
 
-
-
-
 OCaml distinguishes between nonrecursive definitions \(using `let`\) and recursive definitions \(using `let rec`\) largely for technical reasons: the type-inference algorithm needs to know when a set of function definitions are mutually recursive, and for reasons that don't apply to a pure language like Haskell, these have to be marked explicitly by the programmer.
 
 But this decision has some good effects. For one thing, recursive \(and especially mutually recursive\) definitions are harder to reason about than nonrecursive ones. It's therefore useful that, in the absence of an explicit `rec`, you can assume that a `let` binding is nonrecursive, and so can only build upon previous bindings.
@@ -796,8 +790,6 @@ So far, we've seen examples of functions used in both prefix and infix style:
 - : int = 7
 ```
 
-
-
 You might not have thought of the second example as an ordinary function, but it very much is. Infix operators like `+` really only differ syntactically from other functions. In fact, if we put parentheses around an infix operator, you can use it as an ordinary prefix function:
 
 ```text
@@ -807,8 +799,6 @@ You might not have thought of the second example as an ordinary function, but it
 - : int list = [7; 8; 9]
 ```
 
-
-
 In the second expression, we've partially applied `(+)` to create a function that increments its single argument by `3`.
 
 A function is treated syntactically as an operator if the name of that function is chosen from one of a specialized set of identifiers. This set includes identifiers that are sequences of characters from the following set:
@@ -816,8 +806,6 @@ A function is treated syntactically as an operator if the name of that function 
 ```text
 ! $ % & * + - . / : < = > ? @ ^ | ~
 ```
-
-
 
 `or` is one of a handful of predetermined strings, including `mod`, the modulus operator, and `lsl`, for "logical shift left," a bit-shifting operation.
 
@@ -830,8 +818,6 @@ val ( +! ) : int * int -> int * int -> int * int = <fun>
 - : int * int = (1, 6)
 ```
 
-
-
 Note that you have to be careful when dealing with operators containing `*`. Consider the following example:
 
 ```text
@@ -840,40 +826,34 @@ Error: This expression has type int but an expression was expected of type
          float
 ```
 
-
-
 What's going on is that `(***)` isn't interpreted as an operator at all; it's read as a comment! To get this to work properly, we need to put spaces around any operator that begins or ends with `*`:
 
 ```text
 # let ( *** ) x y = (x ** y) ** y;;val ( *** ) : float -> float -> float = <fun>
 ```
 
-
-
 The syntactic role of an operator is typically determined by its first character or two, though there are a few exceptions. [Table 2.1, “Precedence and associativity”](https://realworldocaml.org/v1/en/html/variables-and-functions.html#table2_1) breaks the different operators and other syntactic forms into groups from highest to lowest precedence, explaining how each behaves syntactically. We write `!`... to indicate the class of operators beginning with `!`.
 
 **Table 2.1. Precedence and associativity**
 
 | Operator prefix | Associativity |
-| --------------- | ------------- | undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined |undefined ||  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `!`..., `?`..., `~`...                               | Prefix            |
-| `.`, `.(`, `.[`                                      | -                 |
-| function application, constructor, `assert`, `lazy`  | Left associative  |
-| `-`, `-.`                                            | Prefix            |
-| `**`..., `lsl`, `lsr`, `asr`                         | Right associative |
-| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative  |
-| `+`..., `-`...                                       | Left associative  |
-| `::`                                                 | Right associative |
-| `@`..., `^`...                                       | Right associative |
-| `=`..., `<`..., `>`..., `|`..., `&`..., `$`...       | Left associative  |
-| `&`, `&&`                                            | Right associative |
-| `or`, `||`                                           | Right associative |
-| `,`                                                  | -                 |
-| `<-`, `:=`                                           | Right associative |
-| `if`                                                 | -                 |
-| `;`                                                  | Right associative |
-
-
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `!`..., `?`..., `~`... | Prefix |
+| `.`, `.(`, `.[` | - |
+| function application, constructor, `assert`, `lazy` | Left associative |
+| `-`, `-.` | Prefix |
+| `**`..., `lsl`, `lsr`, `asr` | Right associative |
+| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative |
+| `+`..., `-`... | Left associative |
+| `::` | Right associative |
+| `@`..., `^`... | Right associative |
+| `=`..., `<`..., `>`..., `|`..., `&`..., `$`... | Left associative |
+| `&`, `&&` | Right associative |
+| `or`, `||` | Right associative |
+| `,` | - |
+| `<-`, `:=` | Right associative |
+| `if` | - |
+| `;` | Right associative |
 
 There's one important special case: `-` and `-.`, which are the integer and floating-point subtraction operators, and can act as both prefix operators \(for negation\) and infix operators \(for subtraction\). So, both `-x` and `x - y` are meaningful expressions. Another thing to remember about negation is that it has lower precedence than function application, which means that if you want to pass a negative value, you need to wrap it in parentheses, as you can see in this code:
 
@@ -884,8 +864,6 @@ Error: This expression has type int -> int
        but an expression was expected of type int
 ```
 
-
-
 Here, OCaml is interpreting the second expression as equivalent to:
 
 ```text
@@ -894,8 +872,6 @@ Error: This expression has type int -> int
        but an expression was expected of type int
 ```
 
-
-
 which obviously doesn't make sense.
 
 Here's an example of a very useful operator from the standard library whose behavior depends critically on the precedence rules described previously:
@@ -903,8 +879,6 @@ Here's an example of a very useful operator from the standard library whose beha
 ```text
 # let (|>) x f = f x ;;val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 ```
-
-
 
 It's not quite obvious at first what the purpose of this operator is: it just takes a value and a function and applies the function to the value. Despite that bland-sounding description, it has the useful role of a sequencing operator, similar in spirit to using the pipe character in the UNIX shell. Consider, for example, the following code for printing out the unique elements of your `PATH`. Note that `List.dedup` that follows removes duplicates from a list by sorting the list using the provided comparison function:
 
@@ -922,8 +896,6 @@ It's not quite obvious at first what the purpose of this operator is: it just ta
 - : unit = ()
 ```
 
-
-
 Note that we can do this without `|>`, but the result is a bit more verbose:
 
 ```text
@@ -939,8 +911,6 @@ Note that we can do this without `|>`, but the result is a bit more verbose:
 - : unit = ()
 ```
 
-
-
 An important part of what's happening here is partial application. For example, `List.iter`normally takes two arguments: a function to be called on each element of the list, and the list to iterate over. We can call `List.iter` with all its arguments:
 
 ```text
@@ -951,15 +921,11 @@ lines
 - : unit = ()
 ```
 
-
-
 Or, we can pass it just the function argument, leaving us with a function for printing out a list of strings:
 
 ```text
 # List.iter ~f:print_endline;;- : string list -> unit = <fun>
 ```
-
-
 
 It is this later form that we're using in the preceding `|>` pipeline.
 
@@ -976,15 +942,12 @@ Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
        Type string list is not compatible with type
-         string list -> string list 
+         string list -> string list
 ```
-
-
 
 The type error is a little bewildering at first glance. What's going on is that, because `^>` is right associative, the operator is trying to feed the value `List.dedup ~compare:String.compare` to the function `List.iter ~f:print_endline`. But `List.iter ~f:print_endline` expects a list of strings as its input, not a function.
 
-The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.  
-
+The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.
 
 ### Declaring Functions with Function
 
@@ -998,8 +961,6 @@ Another way to define a function is using the `function` keyword. Instead of hav
 # List.map ~f:some_or_zero [Some 3; None; Some 4];;- : int list = [3; 0; 4]
 ```
 
-
-
 This is equivalent to combining an ordinary function definition with a `match`:
 
 ```text
@@ -1009,8 +970,6 @@ This is equivalent to combining an ordinary function definition with a `match`:
     | None -> 0
   ;;val some_or_zero : int option -> int = <fun>
 ```
-
-
 
 We can also combine the different styles of function declaration together, as in the following example, where we declare a two-argument \(curried\) function with a pattern match on the second argument:
 
@@ -1023,8 +982,6 @@ We can also combine the different styles of function declaration together, as in
 # List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;- : int list = [3; 100; 4]
 ```
 
-
-
 Also, note the use of partial application to generate the function passed to `List.map`. In other words, `some_or_default 100` is a function that was created by feeding just the first argument to `some_or_default`.
 
 ### Labeled Arguments
@@ -1035,16 +992,12 @@ Up until now, the functions we've defined have specified their arguments positio
 # let ratio ~num ~denom = float num /. float denom;;val ratio : num:int -> denom:int -> float = <fun>
 ```
 
-
-
 We can then provide a labeled argument using a similar convention. As you can see, the arguments can be provided in any order:
 
 ```text
 # ratio ~num:3 ~denom:10;;- : float = 0.3
 # ratio ~denom:10 ~num:3;;- : float = 0.3
 ```
-
-
 
 OCaml also supports _label punning_, meaning that you get to drop the text after the `:` if the name of the label and the name of the variable being used are the same. We were actually already using label punning when defining `ratio`. The following shows how punning can be used when invoking a function:
 
@@ -1063,16 +1016,14 @@ Labeled arguments are useful in a few different cases:
   val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
   ```
 
+The signature makes it hard to divine the meaning of those two arguments. but with labeled arguments, we can make the intent immediately clear:
 
-  The signature makes it hard to divine the meaning of those two arguments. but with labeled arguments, we can make the intent immediately clear:
-
-  ```text
+```text
   val create_hashtable :
     init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
-  ```
+```
 
-
-  Choosing label names well is especially important for Boolean values, since it's often easy to get confused about whether a value being true is meant to enable or disable a given feature.
+Choosing label names well is especially important for Boolean values, since it's often easy to get confused about whether a value being true is meant to enable or disable a given feature.
 
 * When defining functions that have multiple arguments that might get confused with each other. This is most at issue when the arguments are of the same type. For example, consider this signature for a function that extracts a substring:
 
@@ -1080,15 +1031,13 @@ Labeled arguments are useful in a few different cases:
   val substring: string -> int -> int -> string
   ```
 
+Here, the two `ints` are the starting position and length of the substring to extract, respectively. We can make this fact more obvious from the signature by adding labeled:
 
-  Here, the two `ints` are the starting position and length of the substring to extract, respectively. We can make this fact more obvious from the signature by adding labeled:
-
-  ```text
+```text
   val substring: string -> pos:int -> len:int -> string
-  ```
+```
 
-
-  This improves the readability of both the signature and of client code that makes use of `substring` and makes it harder to accidentally swap the position and the length.
+This improves the readability of both the signature and of client code that makes use of `substring` and makes it harder to accidentally swap the position and the length.
 
 * When you want flexibility on the order in which arguments are passed. Consider a function like `List.iter`, which takes two arguments: a function and a list of elements to call that function on. A common pattern is to partially apply `List.iter` by giving it just the function, as in the following example from earlier in the chapter:
 
@@ -1105,8 +1054,7 @@ Labeled arguments are useful in a few different cases:
   - : unit = ()
   ```
 
-
-  This requires that we put the function argument first. In other cases, you want to put the function argument second. One common reason is readability. In particular, a multiline function passed as an argument to another function is easiest to read when it is the final argument to that function.
+This requires that we put the function argument first. In other cases, you want to put the function argument second. One common reason is readability. In particular, a multiline function passed as an argument to another function is easiest to read when it is the final argument to that function.
 
 ### Higher-order functions and labels
 
@@ -1116,20 +1064,17 @@ One surprising gotcha with labeled arguments is that while order doesn't matter 
 # let apply_to_tuple f (first,second) = f ~first ~second;;val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 ```
 
-
 Here, the definition of `apply_to_tuple` sets up the expectation that its first argument is a function with two labeled arguments, `first` and `second`, listed in that order. We could have defined `apply_to_tuple` differently to change the order in which the labeled arguments were listed:
 
 ```text
 # let apply_to_tuple_2 f (first,second) = f ~second ~first;;val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
 ```
 
-
 It turns out this order matters. In particular, if we define a function that has a different order
 
 ```text
 # let divide ~first ~second = first / second;;val divide : first:int -> second:int -> int = <fun>
 ```
-
 
 we'll find that it can't be passed in to `apply_to_tuple_2`.
 
@@ -1139,14 +1084,12 @@ Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
 
-
 But, it works smoothly with the original `apply_to_tuple`:
 
 ```text
 # let apply_to_tuple f (first,second) = f ~first ~second;;val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 # apply_to_tuple divide (3,4);;- : int = 0
 ```
-
 
 As a result, when passing labeled functions as arguments, you need to take care to be consistent in your ordering of labeled arguments.
 
@@ -1165,7 +1108,6 @@ Here's an example of a string concatenation function with an optional separator.
 # concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;- : string = "foo:bar"
 ```
 
-
 Here, `?` is used in the definition of the function to mark `sep` as optional. And while the caller can pass a value of type `string` for `sep`, internally to the function, `sep` is seen as a `string option`, with `None` appearing when `sep` is not provided by the caller.
 
 The preceding example needed a bit of boilerplate to choose a default separator when none was provided. This is a common enough pattern that there's an explicit syntax for providing a default value, which allows us to write `concat` more concisely:
@@ -1173,7 +1115,6 @@ The preceding example needed a bit of boilerplate to choose a default separator 
 ```text
 # let concat ?(sep="") x y = x ^ sep ^ y ;;val concat : ?sep:string -> string -> string -> string = <fun>
 ```
-
 
 Optional arguments are very useful, but they're also easy to abuse. The key advantage of optional arguments is that they let you write functions with multiple arguments that users can ignore most of the time, only worrying about them when they specifically want to invoke those options. They also allow you to extend an API with new functionality without changing existing code.
 
@@ -1192,14 +1133,12 @@ But sometimes, passing in `Some` or `None` explicitly is exactly what you want. 
 # concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;- : string = "foo:bar"
 ```
 
-
 And the following two lines are equivalent ways of calling `concat` without specifying `sep`:
 
 ```text
 # concat "foo" "bar" (* don't provide the optional argument *);;- : string = "foobar"
 # concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;- : string = "foobar"
 ```
-
 
 One use case for this is when you want to define a wrapper function that mimics the optional arguments of the function it's wrapping. For example, imagine we wanted to create a function called `uppercase_concat`, which is the same as `concat` except that it converts the first string that it's passed to uppercase. We could write the function as follows:
 
@@ -1209,7 +1148,6 @@ One use case for this is when you want to define a wrapper function that mimics 
 # uppercase_concat "foo" "bar" ~sep:":";;- : string = "FOO:bar"
 ```
 
-
 In the way we've written it, we've been forced to separately make the decision as to what the default separator is. Thus, if we later change `concat`'s default behavior, we'll need to remember to change `uppercase_concat` to match it.
 
 Instead, we can have `uppercase_concat` simply pass through the optional argument to `concat`using the `?` syntax:
@@ -1217,7 +1155,6 @@ Instead, we can have `uppercase_concat` simply pass through the optional argumen
 ```text
 # let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 ```
-
 
 Now, if someone calls `uppercase_concat` without an argument, an explicit `None` will be passed to `concat`, leaving `concat` to decide what the default behavior should be.
 
@@ -1239,7 +1176,6 @@ One subtle aspect of labeled and optional arguments is how they are inferred by 
   <fun>
 ```
 
-
 In principle, it's not obvious how the order of the arguments to `f` should be chosen. Since labeled arguments can be passed in arbitrary order, it seems like it could as well be `y:float -> x:float -> float` as it is `x:float -> y:float -> float`.
 
 Even worse, it would be perfectly consistent for `f` to take an optional argument instead of a labeled one, which could lead to this type signature for `numeric_deriv`:
@@ -1249,7 +1185,6 @@ val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float
 ```
-
 
 Since there are multiple plausible types to choose from, OCaml needs some heuristic for choosing between them. The heuristic the compiler uses is to prefer labels to options and to choose the order of arguments that shows up in the source code.
 
@@ -1269,7 +1204,6 @@ in an order different from other calls.
 This is only allowed when the real type is known.
 ```
 
-
 As suggested by the error message, we can get OCaml to accept the fact that `f` is used with different argument orders if we provide explicit type information. Thus, the following code compiles without error, due to the type annotation on `f`:
 
 ```text
@@ -1286,7 +1220,6 @@ As suggested by the error message, we can get OCaml to accept the fact that `f` 
   <fun>
 ```
 
-
 ### Optional arguments and partial application
 
 Optional arguments can be tricky to think about in the presence of partial application. We can of course partially apply the optional argument itself:
@@ -1296,14 +1229,12 @@ Optional arguments can be tricky to think about in the presence of partial appli
 # colon_concat "a" "b";;- : string = "a:b"
 ```
 
-
 But what happens if we partially apply just the first argument?
 
 ```text
 # let prepend_pound = concat "# ";;val prepend_pound : string -> string = <fun>
 # prepend_pound "a BASH comment";;- : string = "# a BASH comment"
 ```
-
 
 The optional argument `?sep` has now disappeared, or been _erased_. Indeed, if we try to pass in that optional argument now, it will be rejected:
 
@@ -1313,7 +1244,6 @@ Error: This function has type string -> string
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
 
-
 So when does OCaml decide to erase an optional argument?
 
 The rule is: an optional argument is erased as soon as the first positional \(i.e., neither labeled nor optional\) argument defined _after_ the optional argument is passed in. That explains the behavior of `prepend_pound`. But if we had instead defined `concat` with the optional argument in the second position:
@@ -1321,7 +1251,6 @@ The rule is: an optional argument is erased as soon as the first positional \(i.
 ```text
 # let concat x ?(sep="") y = x ^ sep ^ y ;;val concat : string -> ?sep:string -> string -> string = <fun>
 ```
-
 
 then application of the first argument would not cause the optional argument to be erased.
 
