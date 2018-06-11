@@ -66,7 +66,7 @@ However, for any notably variance,  a Tips using Gitbook's **hint** will to be g
 
 To not confuse our readers, we should always provide hints about Reason variance before using these variances in our code snippet. This can help our readers noticing the difference and building the prerequisites to understand the code.
 
+## Be careful with special char
 
-
-
+For example, using `|` in table will break the Gitbook's markdown parser. It can be workaround by using ascii code with manual wrapping `<code>&#124;</code>` 
 
