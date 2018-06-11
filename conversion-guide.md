@@ -59,7 +59,7 @@ One of the principle of this project is make the whole thing highly readable as 
 However, for any notably variance,  a Tips using Gitbook's **hint** will to be given to elaborate the difference. For example:
 
 {% hint style="info" %}
-**Reason** is pronounced differently with OCaml, obviously. 
+**Reason** is pronounced differently with OCaml, unsurprisingly.
 {% endhint %}
 
 ## Reason hints before code sample
