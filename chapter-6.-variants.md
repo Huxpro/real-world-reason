@@ -36,7 +36,7 @@ Let's consider a concrete example of how variants can be useful. Almost all term
 
 ```rust
 # type basic_color =
-   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;
+   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;
   type basic_color =
      Black
    | Red
@@ -83,8 +83,8 @@ The following function uses pattern matching to convert a `basic_color` to a cor
 
 ```rust
 # let basic_color_to_int = fun
-  | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
-  | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;
+  | Black => 0 | Red     => 1 | Green => 2 | Yellow => 3
+  | Blue  => 4 | Magenta => 5 | Cyan  => 6 | White  => 7 ;
 let basic_color_to_int: basic_color => int = <fun>;
 # List.map(basic_color_to_int, [Blue, Red]);
 - : list(int) = [4, 1]
@@ -111,7 +111,12 @@ Using the preceding function, we can generate escape codes to change the color o
 {% tab title="Reason" %}
 
 ```rust
-TBD
+let color_by_number = (number, text) =>
+  "\033[3" ++ string_of_int(number) ++ "m" ++ text ++"\033[0m";
+
+let blue = color_by_number(basic_color_to_int(Blue), "Blue");
+
+Js.log("Hello" ++ blue ++ "World!\n");
 ```
 
 {% endtab %}
@@ -140,6 +145,18 @@ In this example, the cases of the variant are simple tags with no associated dat
 
 We'll also represent this more complicated color space as a variant, but this time, the different tags will have arguments that describe the data available in each case. Note that variants can have multiple arguments, which are separated by `*`s:
 
+```rust
+type weight = Regular | Bold;
+
+type color =
+  | Basic(basic_color, weight) /* basic colors, regular and bold */
+  | RGB(int, int, int)         /* 6x6x6 color cube */
+  | Gray(int);                 /* 24 grayscale levels */
+
+[RGB(250,70,70), Basic(Green, Regular)]
+/* - : list(color) = [RGB(250, 70, 70), Basic(Green, Regular)] */
+```
+
 ```text
 # type weight = Regular | Bold
   type color =
@@ -156,16 +173,40 @@ type color =
 
 Once again, we'll use pattern matching to convert a color to a corresponding integer. But in this case, the pattern matching does more than separate out the different cases; it also allows us to extract the data associated with each tag:
 
+```rust
+let color_to_int = fun
+  | Basic(basic_color, weight) => {
+      let base = switch (weight) {
+        | Bold => 8
+        | Regular => 0
+      };
+      base + basic_color_to_int(basic_color);
+    }
+  | RGB(r, g, b) => 16 + b + g * 6 + r * 36
+  | Gray(i) => 232 + i;
+/* let color_to_int: color => int = <fun>; */
+```
+
 ```text
 # let color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i ;;val color_to_int : color -> int = <fun>
+    | Gray i -> 232 + i ;;
+val color_to_int : color -> int = <fun>
 ```
 
 Now, we can print text using the full set of available colors:
+
+```rust
+let color_print = (color, s) =>
+  color_by_number(color_to_int(color), s)
+  |> Js.log;
+
+color_print(Basic(Red, Bold), "A bold red!");
+color_print(Gray(4), "A muted gray...");
+```
 
 ```text
 # let color_print color s =
