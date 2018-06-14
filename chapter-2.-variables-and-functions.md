@@ -1128,7 +1128,7 @@ Here, we're going to use a Reason/BuckleScript invented syntax: [Fast Pipe](http
 3 |. (-)(2)   /* 3 - 2 =  1 */
 ```
 
-{% endhint %
+{% endhint %}
 
 {% tabs %}
 {% tab title="Reason" %}
@@ -1139,6 +1139,24 @@ path
 |> Js.String.split(":")
 |. Belt.Set.String.fromArray
 |. Belt.Set.String.forEach(Js.log);
+
+/*
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+*/
+```
+
+{% endtab %}
+{% tab title="Reason (with `|>`)" %}
+
+```rust
+let path = "/usr/bin:/usr/local/bin:/bin:/sbin";
+(path
+|> Js.String.split(":")
+|> Belt.Set.String.fromArray
+|> Belt.Set.String.forEach)(Js.log);
 
 /*
 /bin
@@ -1258,6 +1276,26 @@ It is this later form that we're using in the preceding `|>` pipeline.
 
 But `|>` only works in the intended way because it is left-associative. Let's see what happens if we try using a right-associative operator, like \(^&gt;\):
 
+```rust
+let (^>) = (x, f) => f(x);
+
+let path = "/usr/bin:/usr/local/bin:/bin:/sbin";
+(path
+^> Js.String.split(":")
+^> Belt.Set.String.fromArray
+^> Belt.Set.String.forEach)(Js.log);
+
+Line 7, 3:
+This has type:
+  Belt.Set.String.t -> (Belt.Set.String.value -> unit) -> unit
+But somewhere wanted:
+  (Belt.Set.String.value array -> Belt.Set.String.t) -> 'a
+The incompatible parts:
+  Belt.Set.String.t (defined as Belt.Set.String.t)
+  vs
+  Belt.Set.String.value array -> Belt.Set.String.t
+```
+
 ```text
 # let (^>) x f = f x;;
 val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
@@ -1277,6 +1315,11 @@ Error: This expression has type string list -> unit
 
 The type error is a little bewildering at first glance. What's going on is that, because `^>` is right associative, the operator is trying to feed the value `List.dedup ~compare:String.compare` to the function `List.iter ~f:print_endline`. But `List.iter ~f:print_endline` expects a list of strings as its input, not a function.
 
+
+{% hint style="info" %}
+Similarly, in the Reason one, `^>` operater is trying to feed the value `Belt.Set.String.fromArray` to the function `Belt.Set.String.forEach`. But `Belt.Set.String.forEach` expects `Belt.Set.String.t` as its input, not a function.
+{% endhint %}
+
 The type error aside, this example highlights the importance of choosing the operator you use with care, particularly with respect to associativity.
 
 {% hint style="info" %}
@@ -1285,7 +1328,7 @@ The type error aside, this example highlights the importance of choosing the ope
 
 Recap that the precedence and associativity of OCaml's operators are defined by its first or two characters.
 
-According to [Custom operators in OCaml](http://blog.shaynefletcher.org/2016/09/custom-operators-in-ocaml.html), we can basically define custom operator from level 0 to level 4.
+[Custom operators in OCaml](http://blog.shaynefletcher.org/2016/09/custom-operators-in-ocaml.html) is also a good resource to checkout.
 
 ```Rust
 /* apply
@@ -1293,6 +1336,7 @@ According to [Custom operators in OCaml](http://blog.shaynefletcher.org/2016/09/
 ( @@ ) : ('a => 'b) => 'a => 'b
 (-)(3) @@ 2     /* 3 - 2 = 1 */
 (-) @@ 3 @@ 2   /* (-) @@ (3 @@ 2) won't work */
+
 
 /* pipeline or rev-apply,
  * level 0 (= < > | & $) is left-assoc */
@@ -1324,40 +1368,78 @@ let (<|) = (f, x) => f(x);
 (-)(3) <| 2     /* 3 - 2 = 1 */
 (-) <| 3 <| 2   /* ((-) <| 3) <| 2 */
 ```
-
 {% endhint %}
 
 ### Declaring Functions with Function
 
 Another way to define a function is using the `function` keyword. Instead of having syntactic support for declaring multiargument \(curried\) functions, `function` has built-in pattern matching. Here's an example:
 
+
+{% hint style="info" %}
+Reason use `fun`.
+{% endhint %}
+
+```rust
+# let some_or_zero = fun
+  | Some(x) => x
+  | None => 0;
+let some_or_zero: option(int) => int = <fun>;
+# List.map(some_or_zero, [Some(3), None, Some(4)]);
+- : list(int) = [3, 0, 4]
+```
+
 ```text
 # let some_or_zero = function
      | Some x -> x
      | None -> 0
-  ;;val some_or_zero : int option -> int = <fun>
-# List.map ~f:some_or_zero [Some 3; None; Some 4];;- : int list = [3; 0; 4]
+  ;;
+val some_or_zero : int option -> int = <fun>
+# List.map ~f:some_or_zero [Some 3; None; Some 4];;
+- : int list = [3; 0; 4]
 ```
 
 This is equivalent to combining an ordinary function definition with a `match`:
+
+```rust
+# let some_or_zero = (num_opt) =>
+  switch num_opt {
+  | Some(x) => x
+  | None => 0
+  };
+let some_or_zero: option(int) => int = <fun>;
+```
 
 ```text
 # let some_or_zero num_opt =
     match num_opt with
     | Some x -> x
     | None -> 0
-  ;;val some_or_zero : int option -> int = <fun>
+  ;;
+val some_or_zero : int option -> int = <fun>
 ```
 
 We can also combine the different styles of function declaration together, as in the following example, where we declare a two-argument \(curried\) function with a pattern match on the second argument:
 
+```rust
+# let some_or_default = (default) => fun
+    | Some(x) => x
+    | None => default;
+let some_or_default: ('a, option('a)) => 'a = <fun>;
+# some_or_default(3, Some(5));
+- : int = 5
+# List.map(some_or_default(100), [Some(3), None, Some(4)]);
+- : list(int) = [3, 100, 4]
+```
 ```text
 # let some_or_default default = function
      | Some x -> x
      | None -> default
-  ;;val some_or_default : 'a -> 'a option -> 'a = <fun>
-# some_or_default 3 (Some 5);;- : int = 5
-# List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;- : int list = [3; 100; 4]
+  ;;
+val some_or_default : 'a -> 'a option -> 'a = <fun>
+# some_or_default 3 (Some 5);;
+- : int = 5
+# List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
+- : int list = [3; 100; 4]
 ```
 
 Also, note the use of partial application to generate the function passed to `List.map`. In other words, `some_or_default 100` is a function that was created by feeding just the first argument to `some_or_default`.
@@ -1366,15 +1448,22 @@ Also, note the use of partial application to generate the function passed to `Li
 
 Up until now, the functions we've defined have specified their arguments positionally, _i.e._, by the order in which the arguments are passed to the function. OCaml also supports labeled arguments, which let you identify a function argument by name. Indeed, we've already encountered functions from Core like `List.map` that use labeled arguments. Labeled arguments are marked by a leading tilde, and a label \(followed by a colon\) is put in front of the variable to be labeled. Here's an example:
 
+```rust
+let ratio = (~num, ~denom) => float(num) /. float(denom);
+let ratio: (~num: int, ~denom: int) => float = <fun>;
+```
 ```text
-# let ratio ~num ~denom = float num /. float denom;;val ratio : num:int -> denom:int -> float = <fun>
+# let ratio ~num ~denom = float num /. float denom;;
+val ratio : num:int -> denom:int -> float = <fun>
 ```
 
 We can then provide a labeled argument using a similar convention. As you can see, the arguments can be provided in any order:
 
 ```text
-# ratio ~num:3 ~denom:10;;- : float = 0.3
-# ratio ~denom:10 ~num:3;;- : float = 0.3
+# ratio ~num:3 ~denom:10;;
+- : float = 0.3
+# ratio ~denom:10 ~num:3;;
+- : float = 0.3
 ```
 
 OCaml also supports _label punning_, meaning that you get to drop the text after the `:` if the name of the label and the name of the variable being used are the same. We were actually already using label punning when defining `ratio`. The following shows how punning can be used when invoking a function:
@@ -1434,7 +1523,7 @@ This improves the readability of both the signature and of client code that make
 
 This requires that we put the function argument first. In other cases, you want to put the function argument second. One common reason is readability. In particular, a multiline function passed as an argument to another function is easiest to read when it is the final argument to that function.
 
-### Higher-order functions and labels
+#### Higher-order functions and labels
 
 One surprising gotcha with labeled arguments is that while order doesn't matter when calling a function with labeled arguments, it does matter in a higher-order context, _e.g._, when passing a function with labeled arguments to another function. Here's an example:
 
@@ -1500,7 +1589,7 @@ The downside is that the caller may be unaware that there is a choice to be made
 
 This means that rarely used functions should not have optional arguments. A good rule of thumb is to avoid optional arguments for functions internal to a module, _i.e._, functions that are not included in the module's interface, or `mli` file. We'll learn more about `mli`s in [Chapter 4, Files, Modules, and Programs](https://realworldocaml.org/v1/en/html/files-modules-and-programs.html).
 
-### Explicit passing of an optional argument
+#### Explicit passing of an optional argument
 
 Under the covers, a function with an optional argument receives `None` when the caller doesn't provide the argument, and `Some` when it does. But the `Some` and `None` are normally not explicitly passed in by the caller.
 
@@ -1536,7 +1625,7 @@ Instead, we can have `uppercase_concat` simply pass through the optional argumen
 
 Now, if someone calls `uppercase_concat` without an argument, an explicit `None` will be passed to `concat`, leaving `concat` to decide what the default behavior should be.
 
-### Inference of labeled and optional arguments
+#### Inference of labeled and optional arguments
 
 One subtle aspect of labeled and optional arguments is how they are inferred by the type system. Consider the following example for computing numerical derivatives of a function of two real variables. The function takes an argument `delta`, which determines the scale at which to compute the derivative; values `x` and `y`, which determine at which point to compute the derivative; and the function `f`, whose derivative is being computed. The function `f` itself takes two labeled arguments, `x` and `y`. Note that you can use an apostrophe as part of a variable name, so `x'` and `y'` are just ordinary variables:
 
@@ -1598,7 +1687,7 @@ As suggested by the error message, we can get OCaml to accept the fact that `f` 
   <fun>
 ```
 
-### Optional arguments and partial application
+#### Optional arguments and partial application
 
 Optional arguments can be tricky to think about in the presence of partial application. We can of course partially apply the optional argument itself:
 
