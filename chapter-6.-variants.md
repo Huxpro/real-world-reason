@@ -17,10 +17,7 @@ type <variant> =
 {% endtab %}
 {% tab title="OCaml" %}
 
-```ocaml
-type <variant> =  
-  | <Tag> [ of <type> [* <type>]... ]  
-  | <Tag> [ of <type> [* <type>]... ]  
+```ocaml type <variant> =  | <Tag> [ of <type> [* <type>]... ]  | <Tag> [ of <type> [* <type>]... ]
   | ...
 ```
 
@@ -107,16 +104,21 @@ val basic_color_to_int : basic_color -> int = <fun>
 
 Using the preceding function, we can generate escape codes to change the color of a given string displayed in a terminal:
 
+{% hint style="info" %}
+Reason/BuckleScript provide a special [quoted string with variable interpolation functionality](https://reasonml.github.io/docs/en/string-and-char.html#quoted-string) `{j|string and $(var) goes here|j}` here we are using to do the string formatting.
+
+Also noticed that we are targeting terminal instead of browser console here. To see the result, you can execute the JS output with NodeJS.
+
+{% endhint %}
+
 {% tabs %}
 {% tab title="Reason" %}
 
 ```rust
-let color_by_number = (number, text) =>
-  "\033[3" ++ string_of_int(number) ++ "m" ++ text ++"\033[0m";
+let color_by_number = (number, text) => {j|\033[3$(number)m$(text)\033[0m|j};
 
-let blue = color_by_number(basic_color_to_int(Blue), "Blue");
-
-Js.log("Hello" ++ blue ++ "World!\n");
+let blue = color_by_number(4, "Blue");
+Js.log({j|Hello  $(blue) World!\n|j});
 ```
 
 {% endtab %}
@@ -145,6 +147,9 @@ In this example, the cases of the variant are simple tags with no associated dat
 
 We'll also represent this more complicated color space as a variant, but this time, the different tags will have arguments that describe the data available in each case. Note that variants can have multiple arguments, which are separated by `*`s:
 
+{% tabs %}
+{% tab title="Reason" %}
+
 ```rust
 type weight = Regular | Bold;
 
@@ -157,7 +162,10 @@ type color =
 /* - : list(color) = [RGB(250, 70, 70), Basic(Green, Regular)] */
 ```
 
-```text
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # type weight = Regular | Bold
   type color =
   | Basic of basic_color * weight (* basic colors, regular and bold *)
@@ -171,7 +179,13 @@ type color =
 # [RGB (250,70,70); Basic (Green, Regular)];;- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 ```
 
+{% endtab %}
+{% endtabs %}
+
 Once again, we'll use pattern matching to convert a color to a corresponding integer. But in this case, the pattern matching does more than separate out the different cases; it also allows us to extract the data associated with each tag:
+
+{% tabs %}
+{% tab title="Reason" %}
 
 ```rust
 let color_to_int = fun
@@ -187,7 +201,10 @@ let color_to_int = fun
 /* let color_to_int: color => int = <fun>; */
 ```
 
-```text
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
@@ -197,7 +214,12 @@ let color_to_int = fun
 val color_to_int : color -> int = <fun>
 ```
 
+{% endtab %}
+{% endtabs %}
+
 Now, we can print text using the full set of available colors:
+{% tabs %}
+{% tab title="Reason" %}
 
 ```rust
 let color_print = (color, s) =>
@@ -208,7 +230,18 @@ color_print(Basic(Red, Bold), "A bold red!");
 color_print(Gray(4), "A muted gray...");
 ```
 
-```text
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let color_print color s =
-     printf "%s\n" (color_by_number (color_to_int color) s);;val color_print : color -> string -> unit = <fun># color_print (Basic (Red,Bold)) "A bold red!";;A bold red!# color_print (Gray 4) "A muted gray...";;A muted gray...
+     printf "%s\n" (color_by_number (color_to_int color) s);
+val color_print : color -> string -> unit = <fun>
+# color_print (Basic (Red,Bold)) "A bold red!";;
+A bold red!
+# color_print (Gray 4) "A muted gray...";;
+A muted gray...
 ```
+
+{% endtab %}
+{% endtabs %}
