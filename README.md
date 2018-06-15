@@ -1,6 +1,6 @@
 # Read Me
 
-This project is not to introduce a new book. The goal is to simply convert \(almost\) all code \(if it's possible\) within the book "Real World OCaml" from OCaml to Reason, plus necessary explanations on how Reason varies.
+The goal of this project is to comment the book "Real World OCaml" with Reason hints, plus providing Reason codes to complement the OCaml codes.
 
 ## Real World OCaml?
 
