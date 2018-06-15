@@ -1,6 +1,9 @@
 # Read Me
 
-The goal of this project is to comment the book "Real World OCaml" with Reason hints, plus providing Reason codes to complement the OCaml codes.
+The goal of this project is to comment on "Real World OCaml" with Reason hints, and provide Reason codes to complement the OCaml codes.
+I hope it can be helpful to people like me (who want to learn OCaml/Reason at the same time) while not violating RWO's CC license. It can be also treated as a preparation work for future upstreaming to RWO V2.
+
+See [Reason#1356](https://github.com/facebook/reason/issues/1356#issuecomment-397518319) for more details.
 
 ## Real World OCaml?
 
