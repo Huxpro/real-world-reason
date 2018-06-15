@@ -1315,7 +1315,6 @@ Error: This expression has type string list -> unit
 
 The type error is a little bewildering at first glance. What's going on is that, because `^>` is right associative, the operator is trying to feed the value `List.dedup ~compare:String.compare` to the function `List.iter ~f:print_endline`. But `List.iter ~f:print_endline` expects a list of strings as its input, not a function.
 
-
 {% hint style="info" %}
 Similarly, in the Reason one, `^>` operater is trying to feed the value `Belt.Set.String.fromArray` to the function `Belt.Set.String.forEach`. But `Belt.Set.String.forEach` expects `Belt.Set.String.t` as its input, not a function.
 {% endhint %}
@@ -1368,16 +1367,19 @@ let (<|) = (f, x) => f(x);
 (-)(3) <| 2     /* 3 - 2 = 1 */
 (-) <| 3 <| 2   /* ((-) <| 3) <| 2 */
 ```
+
 {% endhint %}
 
 ### Declaring Functions with Function
 
 Another way to define a function is using the `function` keyword. Instead of having syntactic support for declaring multiargument \(curried\) functions, `function` has built-in pattern matching. Here's an example:
 
-
 {% hint style="info" %}
 Reason use `fun`.
 {% endhint %}
+
+{% tabs %}
+{% tab title="Reason" %}
 
 ```rust
 # let some_or_zero = fun
@@ -1388,7 +1390,10 @@ let some_or_zero: option(int) => int = <fun>;
 - : list(int) = [3, 0, 4]
 ```
 
-```text
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let some_or_zero = function
      | Some x -> x
      | None -> 0
@@ -1398,7 +1403,13 @@ val some_or_zero : int option -> int = <fun>
 - : int list = [3; 0; 4]
 ```
 
+{% endtab %}
+{% endtabs %}
+
 This is equivalent to combining an ordinary function definition with a `match`:
+
+{% tabs %}
+{% tab title="Reason" %}
 
 ```rust
 # let some_or_zero = (num_opt) =>
@@ -1409,7 +1420,10 @@ This is equivalent to combining an ordinary function definition with a `match`:
 let some_or_zero: option(int) => int = <fun>;
 ```
 
-```text
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let some_or_zero num_opt =
     match num_opt with
     | Some x -> x
@@ -1418,7 +1432,12 @@ let some_or_zero: option(int) => int = <fun>;
 val some_or_zero : int option -> int = <fun>
 ```
 
+{% endtab %}
+{% endtabs %}
+
 We can also combine the different styles of function declaration together, as in the following example, where we declare a two-argument \(curried\) function with a pattern match on the second argument:
+{% tabs %}
+{% tab title="Reason" %}
 
 ```rust
 # let some_or_default = (default) => fun
@@ -1430,7 +1449,11 @@ let some_or_default: ('a, option('a)) => 'a = <fun>;
 # List.map(some_or_default(100), [Some(3), None, Some(4)]);
 - : list(int) = [3, 100, 4]
 ```
-```text
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let some_or_default default = function
      | Some x -> x
      | None -> default
@@ -1442,84 +1465,206 @@ val some_or_default : 'a -> 'a option -> 'a = <fun>
 - : int list = [3; 100; 4]
 ```
 
+{% endtab %}
+{% endtabs %}
+
 Also, note the use of partial application to generate the function passed to `List.map`. In other words, `some_or_default 100` is a function that was created by feeding just the first argument to `some_or_default`.
 
 ### Labeled Arguments
 
 Up until now, the functions we've defined have specified their arguments positionally, _i.e._, by the order in which the arguments are passed to the function. OCaml also supports labeled arguments, which let you identify a function argument by name. Indeed, we've already encountered functions from Core like `List.map` that use labeled arguments. Labeled arguments are marked by a leading tilde, and a label \(followed by a colon\) is put in front of the variable to be labeled. Here's an example:
 
+{% tabs %}
+{% tab title="Reason" %}
+
 ```rust
 let ratio = (~num, ~denom) => float(num) /. float(denom);
 let ratio: (~num: int, ~denom: int) => float = <fun>;
 ```
-```text
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let ratio ~num ~denom = float num /. float denom;;
 val ratio : num:int -> denom:int -> float = <fun>
 ```
 
+{% endtab %}
+{% endtabs %}
+
 We can then provide a labeled argument using a similar convention. As you can see, the arguments can be provided in any order:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# ratio(~num=3, ~denom=10);
+- : float = 0.3
+# ratio(~denom=10, ~num=3);
+- : float = 0.3
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # ratio ~num:3 ~denom:10;;
 - : float = 0.3
 # ratio ~denom:10 ~num:3;;
 - : float = 0.3
 ```
 
+{% endtab %}
+{% endtabs %}
+
 OCaml also supports _label punning_, meaning that you get to drop the text after the `:` if the name of the label and the name of the variable being used are the same. We were actually already using label punning when defining `ratio`. The following shows how punning can be used when invoking a function:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+{
+  let num = 3;
+  let denom = 4;
+  ratio(~num, ~denom);
+};
+- : float = 0.75
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let num = 3 in
 let denom = 4 in
-ratio ~num ~denom;;- : float = 0.75
+ratio ~num ~denom;;
+- : float = 0.75
 ```
+
+{% endtab %}
+{% endtabs %}
 
 Labeled arguments are useful in a few different cases:
 
 - When defining a function with lots of arguments. Beyond a certain number, arguments are easier to remember by name than by position.
 - When the meaning of a particular argument is unclear from the type alone. Consider a function for creating a hash table whose first argument is the initial size of the array backing the hash table, and the second is a Boolean flag, which indicates whether that array will ever shrink when elements are removed:
 
-  ```text
-  val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
-  ```
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let create_hashtable: (int, bool) => Hashtable.t('a, 'b);
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
+```
+
+{% endtab %}
+{% endtabs %}
 
 The signature makes it hard to divine the meaning of those two arguments. but with labeled arguments, we can make the intent immediately clear:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let create_hashtable: (~init_size: int, ~allow_shrinking: bool) => Hashtable.t('a, 'b);
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
   val create_hashtable :
     init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
 ```
+
+{% endtab %}
+{% endtabs %}
 
 Choosing label names well is especially important for Boolean values, since it's often easy to get confused about whether a value being true is meant to enable or disable a given feature.
 
 - When defining functions that have multiple arguments that might get confused with each other. This is most at issue when the arguments are of the same type. For example, consider this signature for a function that extracts a substring:
 
-  ```text
-  val substring: string -> int -> int -> string
-  ```
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let substring: (string, int, int) => string;
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+val substring: string -> int -> int -> string
+```
+
+{% endtab %}
+{% endtabs %}
 
 Here, the two `ints` are the starting position and length of the substring to extract, respectively. We can make this fact more obvious from the signature by adding labeled:
 
-```text
-  val substring: string -> pos:int -> len:int -> string
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let substring: (string, ~pos: int, ~len: int) => string;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+val substring: string -> pos:int -> len:int -> string
+```
+
+{% endtab %}
+{% endtabs %}
 
 This improves the readability of both the signature and of client code that makes use of `substring` and makes it harder to accidentally swap the position and the length.
 
 - When you want flexibility on the order in which arguments are passed. Consider a function like `List.iter`, which takes two arguments: a function and a list of elements to call that function on. A common pattern is to partially apply `List.iter` by giving it just the function, as in the following example from earlier in the chapter:
 
-  ```text
-  #   String.split ~on:':' path
-    |> List.dedup ~compare:String.compare
-    |> List.iter ~f:print_endline
-    ;;
+{% hint style="info" %}
+Reason/BuckleScript's `Js` module and `Belt` module didn't choose this style, but it's still a good technique and you can easily convert it yourself (see the below example)
+{% endhint %}
 
-  /bin
-  /sbin
-  /usr/bin
-  /usr/local/bin
-  - : unit = ()
-  ```
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let map = (x, ~f) => List.map(f, x);
+let addOne = (+)(1);
+
+/* both works */
+[1, 2, 3] |> map(~f=addOne);  /* [2, 3, 4] */
+[1, 2, 3] |. map(~f=addOne);  /* [2, 3, 4] */
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+#  String.split ~on:':' path
+  |> List.dedup ~compare:String.compare
+  |> List.iter ~f:print_endline
+  ;;
+
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+```
+
+{% endtab %}
+{% endtabs %}
 
 This requires that we put the function argument first. In other cases, you want to put the function argument second. One common reason is readability. In particular, a multiline function passed as an argument to another function is easiest to read when it is the final argument to that function.
 
@@ -1527,35 +1672,121 @@ This requires that we put the function argument first. In other cases, you want 
 
 One surprising gotcha with labeled arguments is that while order doesn't matter when calling a function with labeled arguments, it does matter in a higher-order context, _e.g._, when passing a function with labeled arguments to another function. Here's an example:
 
-```text
-# let apply_to_tuple f (first,second) = f ~first ~second;;val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let apply_to_tuple = (f, (first, second)) => f(~first, ~second);
+let apply_to_tuple: ((~first: 'a, ~second: 'b) => 'c, ('a, 'b)) => 'c = <fun>;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let apply_to_tuple f (first,second) = f ~first ~second;;
+val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
 
 Here, the definition of `apply_to_tuple` sets up the expectation that its first argument is a function with two labeled arguments, `first` and `second`, listed in that order. We could have defined `apply_to_tuple` differently to change the order in which the labeled arguments were listed:
 
-```text
-# let apply_to_tuple_2 f (first,second) = f ~second ~first;;val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let apply_to_tuple_2 = (f, (first, second)) => f(~second, ~first);
+let apply_to_tuple_2: ((~second: 'a, ~first: 'b) => 'c, ('b, 'a)) => 'c =
+  <fun>;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let apply_to_tuple_2 f (first,second) = f ~second ~first;;
+val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
 
 It turns out this order matters. In particular, if we define a function that has a different order
 
-```text
-# let divide ~first ~second = first / second;;val divide : first:int -> second:int -> int = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let divide = (~first, ~second) => first / second;
+let divide: (~first: int, ~second: int) => int = <fun>;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let divide ~first ~second = first / second;;
+val divide : first:int -> second:int -> int = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
 
 we'll find that it can't be passed in to `apply_to_tuple_2`.
 
-```text
-# apply_to_tuple_2 divide (3,4);;Characters 17-23:
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+apply_to_tuple_2(divide, (3, 4));
+
+Error: This expression has type (~first: int, ~second: int) => int
+       but an expression was expected of type (~second: 'a, ~first: 'b) => 'c
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# apply_to_tuple_2 divide (3,4);;
+
+Characters 17-23:
 Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
 
+{% endtab %}
+{% endtabs %}
+
 But, it works smoothly with the original `apply_to_tuple`:
 
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let apply_to_tuple = (f, (first, second)) => f(~first, ~second);
+let apply_to_tuple: ((~first: 'a, ~second: 'b) => 'c, ('a, 'b)) => 'c = <fun>;
+# apply_to_tuple(divide, (3, 4));
+- : int = 0
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let apply_to_tuple f (first,second) = f ~first ~second;;
+val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
+# apply_to_tuple divide (3,4);;
+- : int = 0
+```
+
+{% endtab %}
+{% endtabs %}
+
 ```text
-# let apply_to_tuple f (first,second) = f ~first ~second;;val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
-# apply_to_tuple divide (3,4);;- : int = 0
+
 ```
 
 As a result, when passing labeled functions as arguments, you need to take care to be consistent in your ordering of labeled arguments.
@@ -1566,22 +1797,85 @@ An optional argument is like a labeled argument that the caller can choose wheth
 
 Here's an example of a string concatenation function with an optional separator. This function uses the `^` operator for pairwise string concatenation:
 
-```text
+{% hint style="info" %}
+Reason use `++` for string concatenation.
+{% endhint %}
+
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let concat = (~sep=?, x, y) => {
+    let sep = switch (sep) {
+      | None => ""
+      | Some(x) => x
+      };
+    x ++ sep ++ y;
+  };
+let concat: (~sep: string=?, string, string) => string = <fun>;
+# concat("foo", "bar");
+- : string = "foobar"
+# concat(~sep=":", "foo", "bar");
+- : string = "foo:bar"
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let concat ?sep x y =
      let sep = match sep with None -> "" | Some x -> x in
      x ^ sep ^ y
-  ;;val concat : ?sep:string -> string -> string -> string = <fun>
+  ;;
+val concat : ?sep:string -> string -> string -> string = <fun>
 # concat "foo" "bar"             (* without the optional argument *);;- : string = "foobar"
 # concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;- : string = "foo:bar"
 ```
+
+{% endtab %}
+{% endtabs %}
 
 Here, `?` is used in the definition of the function to mark `sep` as optional. And while the caller can pass a value of type `string` for `sep`, internally to the function, `sep` is seen as a `string option`, with `None` appearing when `sep` is not provided by the caller.
 
 The preceding example needed a bit of boilerplate to choose a default separator when none was provided. This is a common enough pattern that there's an explicit syntax for providing a default value, which allows us to write `concat` more concisely:
 
-```text
-# let concat ?(sep="") x y = x ^ sep ^ y ;;val concat : ?sep:string -> string -> string -> string = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let concat = (~sep="", x, y) => x ++ sep ++ y;
+let concat: (~sep: string=?, string, string) => string = <fun>;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let concat ?(sep="") x y = x ^ sep ^ y ;;
+val concat : ?sep:string -> string -> string -> string = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
+
+{% hint style="info" %}
+Reason choose a more JavaScript/C-style to unify the syntax or these three kinds of labeled argument (named argument in other language), default argument (a.k.a optional argument with default value) and optional argument (usually support through overloadding):
+
+```rust
+/* labeled argument */
+let concat = (~sep, x, y) => x ++ sep ++ y;
+
+/* optional argument */
+let concat = (~sep=?, x, y) => {
+  let sep = switch (sep) { | None => "" | Some(x) => x };
+  x ++ sep ++ y;
+};
+
+/* default argument */
+let concat = (~sep="", x, y) => x ++ sep ++ y;
+```
+
+{% endhint %}
 
 Optional arguments are very useful, but they're also easy to abuse. The key advantage of optional arguments is that they let you write functions with multiple arguments that users can ignore most of the time, only worrying about them when they specifically want to invoke those options. They also allow you to extend an API with new functionality without changing existing code.
 
@@ -1595,41 +1889,138 @@ Under the covers, a function with an optional argument receives `None` when the 
 
 But sometimes, passing in `Some` or `None` explicitly is exactly what you want. OCaml lets you do this by using `?` instead of `~` to mark the argument. Thus, the following two lines are equivalent ways of specifying the `sep` argument to `concat`:
 
-```text
-# concat ~sep:":" "foo" "bar" (* provide the optional argument *);;- : string = "foo:bar"
-# concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;- : string = "foo:bar"
+{% hint style="info" %}
+In Reason, you will use a `?` prefixing your function argument to explicitly pass a `option`.
+{% endhint %}
+
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# concat(~sep=":", "foo", "bar"); /* provide the optional argument */
+- : string = "foo:bar"
+# concat(~sep=?Some(":"), "foo", "bar"); /* pass an explicit [Some] */
+- : string = "foo:bar"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
+- : string = "foo:bar"
+# concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
+- : string = "foo:bar"
+```
+
+{% endtab %}
+{% endtabs %}
 
 And the following two lines are equivalent ways of calling `concat` without specifying `sep`:
 
-```text
-# concat "foo" "bar" (* don't provide the optional argument *);;- : string = "foobar"
-# concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;- : string = "foobar"
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# concat("foo", "bar"); /* don't provide the optional argument */
+- : string = "foobar"
+# concat(~sep=?None, "foo", "bar"); /* explicitly pass `None` */
+- : string = "foobar"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# concat "foo" "bar" (* don't provide the optional argument *);;
+- : string = "foobar"
+# concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
+- : string = "foobar"
+```
+
+{% endtab %}
+{% endtabs %}
 
 One use case for this is when you want to define a wrapper function that mimics the optional arguments of the function it's wrapping. For example, imagine we wanted to create a function called `uppercase_concat`, which is the same as `concat` except that it converts the first string that it's passed to uppercase. We could write the function as follows:
 
-```text
-# let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
-# uppercase_concat "foo" "bar";;- : string = "FOObar"
-# uppercase_concat "foo" "bar" ~sep:":";;- : string = "FOO:bar"
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let uppercase_concat = (~sep="", a, b) =>
+    concat(~sep, String.uppercase(a), b);
+let uppercase_concat : (~sep: string=?, string, string) => string = <fun>;
+# uppercase_concat("foo", "bar");
+- : string = "FOObar"
+# uppercase_concat("foo", "bar", ~sep=":");
+- : string = "FOO:bar"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
+val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
+# uppercase_concat "foo" "bar";;
+- : string = "FOObarheunlgjdfkjurckkrutvh"
+# uppercase_concat "foo" "bar" ~sep:":";;
+- : string = "FOO:bar"
+```
+
+{% endtab %}
+{% endtabs %}
 
 In the way we've written it, we've been forced to separately make the decision as to what the default separator is. Thus, if we later change `concat`'s default behavior, we'll need to remember to change `uppercase_concat` to match it.
 
 Instead, we can have `uppercase_concat` simply pass through the optional argument to `concat`using the `?` syntax:
 
-```text
-# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let uppercase_concat = (~sep=?, a, b) =>
+  concat(~sep?, String.uppercase(a), b);
+let uppercase_concat : (~sep: string=?, string, string) => string = <fun>;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
+val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
 
 Now, if someone calls `uppercase_concat` without an argument, an explicit `None` will be passed to `concat`, leaving `concat` to decide what the default behavior should be.
 
 #### Inference of labeled and optional arguments
 
 One subtle aspect of labeled and optional arguments is how they are inferred by the type system. Consider the following example for computing numerical derivatives of a function of two real variables. The function takes an argument `delta`, which determines the scale at which to compute the derivative; values `x` and `y`, which determine at which point to compute the derivative; and the function `f`, whose derivative is being computed. The function `f` itself takes two labeled arguments, `x` and `y`. Note that you can use an apostrophe as part of a variable name, so `x'` and `y'` are just ordinary variables:
+{% tabs %}
+{% tab title="Reason" %}
 
-```text
+```rust
+# let numeric_deriv = (~delta, ~x, ~y, ~f) => {
+    let x' = x +. delta;
+    let y' = y +. delta;
+    let base = f(~x, ~y);
+    let dx = (f(~x=x', ~y) -. base) /. delta;
+    let dy = (f(~x, ~y=y') -. base) /. delta;
+    (dx, dy);
+  };
+let numeric_deriv:
+  (~delta: float, ~x: float, ~y: float,
+  ~f: (~x: float, ~y: float) => float) => (float, float) = <fun>;
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let numeric_deriv ~delta ~x ~y ~f =
     let x' = x +. delta in
     let y' = y +. delta in
@@ -1637,27 +2028,68 @@ One subtle aspect of labeled and optional arguments is how they are inferred by 
     let dx = (f ~x:x' ~y -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
     (dx,dy)
-  ;;val numeric_deriv :
+  ;;
+val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
   <fun>
 ```
 
+{% endtab %}
+{% endtabs %}
+
 In principle, it's not obvious how the order of the arguments to `f` should be chosen. Since labeled arguments can be passed in arbitrary order, it seems like it could as well be `y:float -> x:float -> float` as it is `x:float -> y:float -> float`.
 
 Even worse, it would be perfectly consistent for `f` to take an optional argument instead of a labeled one, which could lead to this type signature for `numeric_deriv`:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let numeric_deriv:
+  (~delta: float, ~x: float, ~y: float,
+  ~f: (~x: float, ~y: float) => float) => (float, float) = <fun>;
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float
 ```
 
+{% endtab %}
+{% endtabs %}
+
 Since there are multiple plausible types to choose from, OCaml needs some heuristic for choosing between them. The heuristic the compiler uses is to prefer labels to options and to choose the order of arguments that shows up in the source code.
 
 Note that these heuristics might at different points in the source suggest different types. Here's a version of `numeric_deriv` where different invocations of `f` list the arguments in different orders:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let numeric_deriv = (~delta, ~x, ~y, ~f) => {
+    let x' = x +. delta;
+    let y' = y +. delta;
+    let base = f(~x, ~y);
+    let dx = (f(~y, ~x=x') -. base) /. delta;
+    let dy = (f(~x, ~y=y') -. base) /. delta;
+    (dx, dy);
+  };
+
+Line 5, 14:
+This function is applied to arguments
+in an order different from other calls.
+This is only allowed when the real type is known.
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let numeric_deriv ~delta ~x ~y ~f =
     let x' = x +. delta in
     let y' = y +. delta in
@@ -1665,15 +2097,41 @@ Note that these heuristics might at different points in the source suggest diffe
     let dx = (f ~y ~x:x' -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
     (dx,dy)
-  ;;Characters 130-131:
+  ;;
+
+Characters 130-131:
 Error: This function is applied to arguments
 in an order different from other calls.
 This is only allowed when the real type is known.
 ```
 
+{% endtab %}
+{% endtabs %}
+
 As suggested by the error message, we can get OCaml to accept the fact that `f` is used with different argument orders if we provide explicit type information. Thus, the following code compiles without error, due to the type annotation on `f`:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let numeric_deriv = (~delta, ~x, ~y, ~f: (~x: float, ~y: float) => float) => {
+  let x' = x +. delta;
+  let y' = y +. delta;
+  let base = f(~x, ~y);
+  let dx = (f(~y, ~x=x') -. base) /. delta;
+  let dy = (f(~x, ~y=y') -. base) /. delta;
+  (dx, dy);
+};
+
+let numeric_deriv:
+  (~delta: float, ~x: float, ~y: float, ~f: (~x: float, ~y: float) => float) =>
+  (float, float) = <fun>;
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
     let x' = x +. delta in
     let y' = y +. delta in
@@ -1681,71 +2139,216 @@ As suggested by the error message, we can get OCaml to accept the fact that `f` 
     let dx = (f ~y ~x:x' -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
     (dx,dy)
-  ;;val numeric_deriv :
+  ;;
+
+val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
   <fun>
 ```
 
+{% endtab %}
+{% endtabs %}
+
 #### Optional arguments and partial application
 
 Optional arguments can be tricky to think about in the presence of partial application. We can of course partially apply the optional argument itself:
 
-```text
-# let colon_concat = concat ~sep:":";;val colon_concat : string -> string -> string = <fun>
-# colon_concat "a" "b";;- : string = "a:b"
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let colon_concat = concat(~sep=":");
+let colon_concat: (string, string) => string = <fun>;
+# colon_concat("a", "b");
+- : string = "a:b"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let colon_concat = concat ~sep:":";;
+val colon_concat : string -> string -> string = <fun>
+# colon_concat "a" "b";;
+- : string = "a:b"
+```
+
+{% endtab %}
+{% endtabs %}
 
 But what happens if we partially apply just the first argument?
 
-```text
-# let prepend_pound = concat "# ";;val prepend_pound : string -> string = <fun>
-# prepend_pound "a BASH comment";;- : string = "# a BASH comment"
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let prepend_pound = concat("# ");
+let prepend_pound: string => string = <fun>;
+# prepend_pound("a BASH comment");
+- : string = "# a BASH comment"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let prepend_pound = concat "# ";;
+val prepend_pound : string -> string = <fun>
+# prepend_pound "a BASH comment";;
+- : string = "# a BASH comment"
+```
+
+{% endtab %}
+{% endtabs %}
 
 The optional argument `?sep` has now disappeared, or been _erased_. Indeed, if we try to pass in that optional argument now, it will be rejected:
 
-```text
-# prepend_pound "a BASH comment" ~sep:":";;Characters -1-13:
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# prepend_pound("a BASH comment", ~sep=":");
+Error: This function has type string => string
+       It is applied to too many arguments; maybe you forgot a `;'.
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# prepend_pound "a BASH comment" ~sep:":";;
+
+Characters -1-13:
 Error: This function has type string -> string
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
+
+{% endtab %}
+{% endtabs %}
 
 So when does OCaml decide to erase an optional argument?
 
 The rule is: an optional argument is erased as soon as the first positional \(i.e., neither labeled nor optional\) argument defined _after_ the optional argument is passed in. That explains the behavior of `prepend_pound`. But if we had instead defined `concat` with the optional argument in the second position:
 
-```text
-# let concat x ?(sep="") y = x ^ sep ^ y ;;val concat : string -> ?sep:string -> string -> string = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let concat = (x, ~sep="", y) => x ++ sep ++ y;
+let concat: (string, ~sep: string=?, string) => string = <fun>;
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let concat x ?(sep="") y = x ^ sep ^ y ;;
+val concat : string -> ?sep:string -> string -> string = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
 
 then application of the first argument would not cause the optional argument to be erased.
 
-```text
-# let prepend_pound = concat "# ";;val prepend_pound : ?sep:string -> string -> string = <fun>
-# prepend_pound "a BASH comment";;- : string = "# a BASH comment"
-# prepend_pound "a BASH comment" ~sep:"--- ";;- : string = "# --- a BASH comment"
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# let prepend_pound = concat("# ");
+let prepend_pound: (~sep: string=?, string) => string = <fun>;
+# prepend_pound("a BASH comment");
+- : string = "# a BASH comment"
+# prepend_pound("a BASH comment", ~sep="--- ");
+- : string = "# --- a BASH comment"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# let prepend_pound = concat "# ";;
+val prepend_pound : ?sep:string -> string -> string = <fun>
+# prepend_pound "a BASH comment";;
+- : string = "# a BASH comment"
+# prepend_pound "a BASH comment" ~sep:"--- ";;
+- : string = "# --- a BASH comment"
+```
+
+{% endtab %}
+{% endtabs %}
 
 However, if all arguments to a function are presented at once, then erasure of optional arguments isn't applied until all of the arguments are passed in. This preserves our ability to pass in optional arguments anywhere on the argument list. Thus, we can write:
 
-```text
-# concat "a" "b" ~sep:"=";;- : string = "a=b"
+{% hint style="info" %}
+The compiler do the trick here that so it behave like normal multi-argument call instead of partial application.
+{% endhint %}
+
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# concat("a", "b", ~sep="=");
+- : string = "a=b"
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# concat "a" "b" ~sep:"=";;
+- : string = "a=b"
+```
+
+{% endtab %}
+{% endtabs %}
 
 An optional argument that doesn't have any following positional arguments can't be erased at all, which leads to a compiler warning:
 
-```text
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+let concat = (x, y, ~sep="") => x ++ sep ++ y;
+
+Characters 21-46:
+Warning 16: this optional argument cannot be erased.
+let concat: (string, string, ~sep: string=?) => string = <fun>;
+```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
 # let concat x y ?(sep="") = x ^ sep ^ y ;;
 
 Characters 15-38:
 Warning 16: this optional argument cannot be erased.val concat : string -> string -> ?sep:string -> string = <fun>
 ```
 
+{% endtab %}
+{% endtabs %}
+
 And indeed, when we provide the two positional arguments, the `sep` argument is not erased, instead returning a function that expects the `sep` argument to be provided:
 
-```text
-# concat "a" "b";;- : ?sep:string -> string = <fun>
+{% tabs %}
+{% tab title="Reason" %}
+
+```rust
+# concat("a", "b");
+- : (~sep: string=?) => string = <fun>
 ```
+
+{% endtab %}
+{% tab title="OCaml" %}
+
+```ocaml
+# concat "a" "b";;
+- : ?sep:string -> string = <fun>
+```
+
+{% endtab %}
+{% endtabs %}
 
 As you can see, OCaml's support for labeled and optional arguments is not without its complexities. But don't let these complexities obscure the usefulness of these features. Labels and optional arguments are very effective tools for making your APIs both more convenient and safer, and it's worth the effort of learning how to use them effectively.
