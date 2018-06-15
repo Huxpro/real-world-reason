@@ -6,21 +6,18 @@ The basic syntax of a variant type declaration is as follows:
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 type <variant> =  
   | <Tag> [ (<type> [, <type>]...) ]  
   | <Tag> [ (<type> [, <type>]...) ]  
   | ...
 ```
-
 {% endtab %}
+
 {% tab title="OCaml" %}
+\`\`\`ocaml type  = \|  \[ of  \[ _\]... \] \|  \[ of  \[_ \]... \] \| ...
 
-```ocaml type <variant> =  | <Tag> [ of <type> [* <type>]... ]  | <Tag> [ of <type> [* <type>]... ]
-  | ...
-```
-
+```text
 {% endtab %}
 {% endtabs %}
 
@@ -48,10 +45,9 @@ Let's consider a concrete example of how variants can be useful. Almost all term
 # [Blue, Magenta, Red] ;
 - : list(basic_color) = [Blue, Magenta, Red]
 ```
-
 {% endtab %}
-{% tab title="OCaml" %}
 
+{% tab title="OCaml" %}
 ```ocaml
 # type basic_color =
    | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
@@ -69,7 +65,6 @@ Let's consider a concrete example of how variants can be useful. Almost all term
 # [Blue; Magenta; Red] ;;
 - : basic_color list = [Blue; Magenta; Red]
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -77,7 +72,6 @@ The following function uses pattern matching to convert a `basic_color` to a cor
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 # let basic_color_to_int = fun
   | Black => 0 | Red     => 1 | Green => 2 | Yellow => 3
@@ -86,10 +80,9 @@ let basic_color_to_int: basic_color => int = <fun>;
 # List.map(basic_color_to_int, [Blue, Red]);
 - : list(int) = [4, 1]
 ```
-
 {% endtab %}
-{% tab title="OCaml" %}
 
+{% tab title="OCaml" %}
 ```ocaml
 # let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
@@ -98,7 +91,6 @@ val basic_color_to_int : basic_color -> int = <fun>
 # List.map ~f:basic_color_to_int [Blue;Red];;
 - : int list = [4; 1]
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -108,22 +100,19 @@ Using the preceding function, we can generate escape codes to change the color o
 Reason/BuckleScript provide a special [quoted string with variable interpolation functionality](https://reasonml.github.io/docs/en/string-and-char.html#quoted-string) `{j|string and $(var) goes here|j}` here we are using to do the string formatting.
 
 Also noticed that we are targeting terminal instead of browser console here. To see the result, you can execute the JS output with NodeJS.
-
 {% endhint %}
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 let color_by_number = (number, text) => {j|\033[3$(number)m$(text)\033[0m|j};
 
 let blue = color_by_number(4, "Blue");
 Js.log({j|Hello  $(blue) World!\n|j});
 ```
-
 {% endtab %}
-{% tab title="OCaml" %}
 
+{% tab title="OCaml" %}
 ```ocaml
 # let color_by_number number text =
     sprintf "\027[38;5;%dm%s\027[0m" number text;;
@@ -133,7 +122,6 @@ val blue : string = "\027[38;5;4mBlue\027[0m"
 # printf "Hello %s World!\n" blue;;
 Hello Blue World!
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -141,15 +129,14 @@ On most terminals, that word "Blue" will be rendered in blue.
 
 In this example, the cases of the variant are simple tags with no associated data. This is substantively the same as the enumerations found in languages like C and Java. But as we'll see, variants can do considerably more than represent a simple enumeration. As it happens, an enumeration isn't enough to effectively describe the full set of colors that a modern terminal can display. Many terminals, including the venerable `xterm`, support 256 different colors, broken up into the following groups:
 
-- The eight basic colors, in regular and bold versions
-- A 6 × 6 × 6 RGB color cube
-- A 24-level grayscale ramp
+* The eight basic colors, in regular and bold versions
+* A 6 × 6 × 6 RGB color cube
+* A 24-level grayscale ramp
 
 We'll also represent this more complicated color space as a variant, but this time, the different tags will have arguments that describe the data available in each case. Note that variants can have multiple arguments, which are separated by `*`s:
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 type weight = Regular | Bold;
 
@@ -161,10 +148,9 @@ type color =
 [RGB(250,70,70), Basic(Green, Regular)]
 /* - : list(color) = [RGB(250, 70, 70), Basic(Green, Regular)] */
 ```
-
 {% endtab %}
-{% tab title="OCaml" %}
 
+{% tab title="OCaml" %}
 ```ocaml
 # type weight = Regular | Bold
   type color =
@@ -178,7 +164,6 @@ type color =
   | Gray of int
 # [RGB (250,70,70); Basic (Green, Regular)];;- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 ```
-
 {% endtab %}
 {% endtabs %}
 
@@ -186,7 +171,6 @@ Once again, we'll use pattern matching to convert a color to a corresponding int
 
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 let color_to_int = fun
   | Basic(basic_color, weight) => {
@@ -200,10 +184,9 @@ let color_to_int = fun
   | Gray(i) => 232 + i;
 /* let color_to_int: color => int = <fun>; */
 ```
-
 {% endtab %}
-{% tab title="OCaml" %}
 
+{% tab title="OCaml" %}
 ```ocaml
 # let color_to_int = function
     | Basic (basic_color,weight) ->
@@ -213,14 +196,13 @@ let color_to_int = fun
     | Gray i -> 232 + i ;;
 val color_to_int : color -> int = <fun>
 ```
-
 {% endtab %}
 {% endtabs %}
 
 Now, we can print text using the full set of available colors:
+
 {% tabs %}
 {% tab title="Reason" %}
-
 ```rust
 let color_print = (color, s) =>
   color_by_number(color_to_int(color), s)
@@ -229,10 +211,9 @@ let color_print = (color, s) =>
 color_print(Basic(Red, Bold), "A bold red!");
 color_print(Gray(4), "A muted gray...");
 ```
-
 {% endtab %}
-{% tab title="OCaml" %}
 
+{% tab title="OCaml" %}
 ```ocaml
 # let color_print color s =
      printf "%s\n" (color_by_number (color_to_int color) s);
@@ -242,6 +223,6 @@ A bold red!
 # color_print (Gray 4) "A muted gray...";;
 A muted gray...
 ```
-
 {% endtab %}
 {% endtabs %}
+
