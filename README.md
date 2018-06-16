@@ -1,9 +1,10 @@
 # Read Me
 
-The goal of this project is to comment on "Real World OCaml" with Reason hints, and provide Reason codes to complement the OCaml codes.
-I hope it can be helpful to people like me (who want to learn OCaml/Reason at the same time) while not violating RWO's CC license. It can be also treated as a preparation work for future upstreaming to RWO V2.
+This project comments on "Real World OCaml" with Reason hints, and provide Reason codes to complement the OCaml ones. 
 
-See [Reason#1356](https://github.com/facebook/reason/issues/1356#issuecomment-397518319) for more details.
+This project is for early experimenting purpose and its final goal is upstreaming to the [RWO V2](https://github.com/realworldocaml/book). 
+
+See [Reason\#1356](https://github.com/facebook/reason/issues/1356#issuecomment-397518319) for more details.
 
 ## Real World OCaml?
 
@@ -31,6 +32,4 @@ Reason will keep going on to make it more and more friendly to JavaScript develo
 ## How does this conversion works?
 
 {% page-ref page="meta/conversion-guide.md" %}
-
-
 

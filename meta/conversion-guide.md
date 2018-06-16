@@ -4,9 +4,9 @@
 
 > I believe the main issue is still RWO’s license prohibiting modification of the text. - [**@jordwalke**](https://github.com/jordwalke)
 
-We're using the book's [public html version](https://realworldocaml.org/v1/en/html/index.html) as text source. And the integrity of the text must be kept for the sake of any potential copyright issues, which means we do replace neither word OCaml to Reason nor any syntax differences in original text.
+We're using the book's [public html version](https://realworldocaml.org/v1/en/html/index.html) as text source. And the integrity of the text must be kept for future upstreaming convenience. So we replaced neither word OCaml to Reason nor any syntax differences in original text.
 
-see [https://github.com/facebook/reason/issues/1356](https://github.com/facebook/reason/issues/1356) for more details
+See [Reason\#1356](https://github.com/facebook/reason/issues/1356#issuecomment-397518319) for more details.
 
 ## Using tab to convert code sample
 

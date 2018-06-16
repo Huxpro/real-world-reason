@@ -612,7 +612,6 @@ The parentheses don't change the meaning of the signature, but they make it easi
 
 Currying is more than just a theoretical curiosity. You can make use of currying to specialize a function by feeding in some of the arguments. Here's an example where we create a specialized version of `abs_diff` that measures the distance of a given number from `3`:
 
-
 {% tabs %}
 {% tab title="Reason" %}
 ```rust
@@ -905,24 +904,24 @@ The syntactic role of an operator is typically determined by its first character
 
 **Table 2.1. Precedence and associativity**
 
-| Operator prefix                                      | Associativity     |
-| ---------------------------------------------------- | ----------------- |
-| `!`..., `?`..., `~`...                               | Prefix            |
-| `.`, `.(`, `.[`                                      | -                 |
-| function application, constructor, `assert`, `lazy`  | Left associative  |
-| `-`, `-.`                                            | Prefix            |
-| `**`..., `lsl`, `lsr`, `asr`                         | Right associative |
-| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative  |
-| `+`..., `-`...                                       | Left associative  |
-| `::`                                                 | Right associative |
-| `@`..., `^`...                                       | Right associative |
-| `=`..., `<`..., `>`..., `|`;..., `&`..., `$`...      | Left associative  |
-| `&`, `&&`                                            | Right associative |
-| `or`, `||`                                           | Right associative |
-| `,`                                                  | -                 |
-| `<-`, `:=`                                           | Right associative |
-| `if`                                                 | -                 |
-| `;`                                                  | Right associative |
+| Operator prefix | Associativity |  |  |
+| --- | --- |
+| `!`..., `?`..., `~`... | Prefix |  |  |
+| `.`, `.(`, `.[` | - |  |  |
+| function application, constructor, `assert`, `lazy` | Left associative |  |  |
+| `-`, `-.` | Prefix |  |  |
+| `**`..., `lsl`, `lsr`, `asr` | Right associative |  |  |
+| `*`..., `/`..., `%`..., `mod`, `land`, `lor`, `lxor` | Left associative |  |  |
+| `+`..., `-`... | Left associative |  |  |
+| `::` | Right associative |  |  |
+| `@`..., `^`... | Right associative |  |  |
+| `=`..., `<`..., `>`..., \` | `;...,`&`...,`$\`... | Left associative |  |
+| `&`, `&&` | Right associative |  |  |
+| `or`, \` |  | \` | Right associative |
+| `,` | - |  |  |
+| `<-`, `:=` | Right associative |  |  |
+| `if` | - |  |  |
+| `;` | Right associative |  |  |
 
 There's one important special case: `-` and `-.`, which are the integer and floating-point subtraction operators, and can act as both prefix operators \(for negation\) and infix operators \(for subtraction\). So, both `-x` and `x - y` are meaningful expressions. Another thing to remember about negation is that it has lower precedence than function application, which means that if you want to pass a negative value, you need to wrap it in parentheses, as you can see in this code:
 
@@ -1170,7 +1169,6 @@ Error: This expression has type string list -> unit
 ```
 {% endtab %}
 {% endtabs %}
-
 
 The type error is a little bewildering at first glance. What's going on is that, because `^>` is right associative, the operator is trying to feed the value `List.dedup ~compare:String.compare` to the function `List.iter ~f:print_endline`. But `List.iter ~f:print_endline` expects a list of strings as its input, not a function.
 
@@ -1594,7 +1592,6 @@ val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
 ```
 {% endtab %}
 {% endtabs %}
-
 
 As a result, when passing labeled functions as arguments, you need to take care to be consistent in your ordering of labeled arguments.
 
